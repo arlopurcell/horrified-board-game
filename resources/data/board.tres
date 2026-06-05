@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="BoardData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/board_data.gd" id="1"]
+[ext_resource type="Script" path="res://resources/space_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Space0"]
+script = ExtResource("2")
+id = 0
+name = "The Mill"
+neighbors = [3, 1]
+has_item = false
+
+[sub_resource type="Resource" id="Space1"]
+script = ExtResource("2")
+id = 1
+name = "The Market"
+neighbors = [0, 2]
+has_item = true
+
+[sub_resource type="Resource" id="Space2"]
+script = ExtResource("2")
+id = 2
+name = "The Forest"
+neighbors = [1, 3]
+has_item = false
+
+[sub_resource type="Resource" id="Space3"]
+script = ExtResource("2")
+id = 3
+name = "The Well"
+neighbors = [2, 0]
+has_item = false
+
+[resource]
+script = ExtResource("1")
+spaces = [SubResource("Space0"), SubResource("Space1"), SubResource("Space2"), SubResource("Space3")]
