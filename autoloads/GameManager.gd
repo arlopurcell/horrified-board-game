@@ -5,10 +5,10 @@ signal player_moved(player_index: int, space_id: int)
 
 const MOVES_PER_TURN := 4
 const PLAYER_COLORS: Array[Color] = [
-    Color(0.91, 0.30, 0.24),
-    Color(0.20, 0.60, 0.86),
-    Color(0.18, 0.80, 0.44),
-    Color(0.95, 0.61, 0.07),
+    Color(0.91, 0.30, 0.24),  # red
+    Color(0.20, 0.60, 0.86),  # blue
+    Color(0.18, 0.80, 0.44),  # green
+    Color(0.95, 0.61, 0.07),  # orange
 ]
 const PLAYER_NAMES: Array[String] = ["Player 1", "Player 2", "Player 3", "Player 4"]
 
