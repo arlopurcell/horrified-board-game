@@ -49,6 +49,7 @@ func try_move(space_id: int) -> bool:
 func end_turn() -> void:
     if players.is_empty():
         return
+    # Players may end their turn early — unused moves are forfeited by design.
     active_player_index = (active_player_index + 1) % players.size()
     moves_remaining = MOVES_PER_TURN
     turn_changed.emit(active_player_index)
