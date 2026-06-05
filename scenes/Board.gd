@@ -2,8 +2,6 @@ class_name Board
 extends Node2D
 
 const SpaceNodeScene := preload("res://scenes/SpaceNode.tscn")
-const BOARD_CENTER := Vector2(640, 360)
-const BOARD_RADIUS := 200.0
 
 var _space_nodes: Dictionary = {}   # space_id (int) -> SpaceNode
 
@@ -16,17 +14,13 @@ func _ready() -> void:
 func get_space_center(space_id: int) -> Vector2:
     if space_id in _space_nodes:
         return _space_nodes[space_id].get_space_center()
-    return BOARD_CENTER
+    return Vector2(640, 360)
 
 func _spawn_spaces(board_data: BoardData) -> void:
-    var count := board_data.spaces.size()
-    for i in range(count):
-        var space_data := board_data.spaces[i]
-        var angle := (TAU / count) * i - PI / 2.0
-        var pos := BOARD_CENTER + Vector2(cos(angle), sin(angle)) * BOARD_RADIUS
+    for space_data in board_data.spaces:
         var node: SpaceNode = SpaceNodeScene.instantiate()
         add_child(node)
-        node.position = pos - Vector2(50, 40)   # offset so center aligns to circle
+        node.position = space_data.position - SpaceNode.SIZE / 2
         node.setup(space_data)
         node.clicked.connect(_on_space_clicked)
         _space_nodes[space_data.id] = node
