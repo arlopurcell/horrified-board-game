@@ -3,10 +3,12 @@ extends CanvasLayer
 @onready var turn_banner: Label = $TurnBanner
 @onready var player_roster: HBoxContainer = $PlayerRoster
 @onready var end_turn_button: Button = $EndTurnButton
+@onready var moves_indicator: Label = $MovesIndicator
 
 func _ready() -> void:
     end_turn_button.pressed.connect(_on_end_turn_pressed)
     GameManager.turn_changed.connect(_on_turn_changed)
+    GameManager.player_moved.connect(_on_player_moved)
 
 func setup(player_list: Array[PlayerData]) -> void:
     for child in player_roster.get_children():
@@ -26,6 +28,9 @@ func _on_end_turn_pressed() -> void:
 func _on_turn_changed(_player_index: int) -> void:
     _refresh_turn_display()
 
+func _on_player_moved(_player_index: int, _space_id: int) -> void:
+    _update_moves_indicator()
+
 func _refresh_turn_display() -> void:
     var active := GameManager.get_active_player()
     if active == null:
@@ -38,3 +43,16 @@ func _refresh_turn_display() -> void:
             continue
         var is_active := (i == GameManager.active_player_index)
         lbl.add_theme_font_size_override("font_size", 18 if is_active else 13)
+    _update_moves_indicator()
+
+func _update_moves_indicator() -> void:
+    var active := GameManager.get_active_player()
+    if active == null:
+        return
+    var remaining := GameManager.moves_remaining
+    var total := GameManager.MOVES_PER_TURN
+    var parts: Array[String] = []
+    for i in range(total):
+        parts.append("●" if i < remaining else "○")
+    moves_indicator.text = " ".join(parts)
+    moves_indicator.add_theme_color_override("font_color", active.color)
