@@ -2,6 +2,7 @@ extends Node
 
 signal turn_changed(player_index: int)
 signal player_moved(player_index: int, space_id: int)
+signal items_changed
 
 const MOVES_PER_TURN := 4
 const PLAYER_COLORS: Array[Color] = [
@@ -16,6 +17,8 @@ var players: Array[PlayerData] = []
 var active_player_index: int = 0
 var moves_remaining: int = 0
 var board_data: BoardData = null
+var bag: Array[ItemData] = []
+var board_items: Dictionary = {}    # space_id (int) -> Array[ItemData]
 
 func start_game(player_count: int) -> void:
     player_count = clampi(player_count, 2, 4)
@@ -32,7 +35,27 @@ func start_game(player_count: int) -> void:
         players.append(p)
     active_player_index = 0
     moves_remaining = MOVES_PER_TURN
+    board_items.clear()
+    _place_initial_items()
     turn_changed.emit(0)
+
+func _place_initial_items() -> void:
+    var item_bag_data := load("res://resources/data/items.tres") as ItemBagData
+    if item_bag_data == null:
+        push_error("GameManager: failed to load items.tres")
+        return
+    bag = item_bag_data.items.duplicate()
+    bag.shuffle()
+    var placed := 0
+    for item in bag:
+        if placed >= 12:
+            break
+        if not board_items.has(item.location):
+            board_items[item.location] = []
+        board_items[item.location].append(item)
+        placed += 1
+    bag = bag.slice(12)
+    items_changed.emit()
 
 func try_move(space_id: int) -> bool:
     if moves_remaining <= 0 or players.is_empty() or board_data == null:
@@ -54,10 +77,33 @@ func end_turn() -> void:
     moves_remaining = MOVES_PER_TURN
     turn_changed.emit(active_player_index)
 
+func can_pickup() -> bool:
+    if moves_remaining <= 0 or players.is_empty():
+        return false
+    var space_id := players[active_player_index].current_space_id
+    return board_items.has(space_id) and (board_items[space_id] as Array).size() > 0
+
+func try_pickup() -> bool:
+    if not can_pickup():
+        return false
+    var current_player := players[active_player_index]
+    var space_id := current_player.current_space_id
+    for item in board_items[space_id]:
+        current_player.inventory.append(item as ItemData)
+    board_items.erase(space_id)
+    moves_remaining -= 1
+    items_changed.emit()
+    return true
+
 func get_active_player() -> PlayerData:
     if players.is_empty():
         return null
     return players[active_player_index]
+
+func get_board_items(space_id: int) -> Array:
+    if board_items.has(space_id):
+        return board_items[space_id]
+    return []
 
 func get_legal_moves() -> Array[int]:
     if moves_remaining <= 0 or players.is_empty() or board_data == null:
