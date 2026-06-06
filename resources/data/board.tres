@@ -9,7 +9,6 @@ id = 0
 name = "Cave"
 position = Vector2(200, 150)
 neighbors = [1]
-has_item = false
 
 [sub_resource type="Resource" id="Camp"]
 script = ExtResource("2")
@@ -17,7 +16,6 @@ id = 1
 name = "Camp"
 position = Vector2(420, 150)
 neighbors = [0, 6]
-has_item = false
 
 [sub_resource type="Resource" id="Precinct"]
 script = ExtResource("2")
@@ -25,7 +23,6 @@ id = 2
 name = "Precinct"
 position = Vector2(640, 150)
 neighbors = [7]
-has_item = false
 
 [sub_resource type="Resource" id="Inn"]
 script = ExtResource("2")
@@ -33,7 +30,6 @@ id = 3
 name = "Inn"
 position = Vector2(860, 150)
 neighbors = [7]
-has_item = false
 
 [sub_resource type="Resource" id="Barn"]
 script = ExtResource("2")
@@ -41,7 +37,6 @@ id = 4
 name = "Barn"
 position = Vector2(1080, 150)
 neighbors = [8]
-has_item = false
 
 [sub_resource type="Resource" id="Dungeon"]
 script = ExtResource("2")
@@ -49,7 +44,6 @@ id = 5
 name = "Dungeon"
 position = Vector2(1300, 150)
 neighbors = [9]
-has_item = false
 
 [sub_resource type="Resource" id="Bridge1"]
 script = ExtResource("2")
@@ -57,7 +51,6 @@ id = 6
 name = ""
 position = Vector2(530, 265)
 neighbors = [1, 7, 11]
-has_item = false
 
 [sub_resource type="Resource" id="Fountain"]
 script = ExtResource("2")
@@ -65,7 +58,6 @@ id = 7
 name = ""
 position = Vector2(750, 265)
 neighbors = [6, 2, 3, 8]
-has_item = false
 
 [sub_resource type="Resource" id="Theatre"]
 script = ExtResource("2")
@@ -73,7 +65,6 @@ id = 8
 name = "Theatre"
 position = Vector2(970, 265)
 neighbors = [7, 4, 9, 17]
-has_item = false
 
 [sub_resource type="Resource" id="Tower"]
 script = ExtResource("2")
@@ -81,7 +72,6 @@ id = 9
 name = "Tower"
 position = Vector2(1190, 265)
 neighbors = [8, 13, 5]
-has_item = false
 
 [sub_resource type="Resource" id="Abbey"]
 script = ExtResource("2")
@@ -89,7 +79,6 @@ id = 10
 name = "Abbey"
 position = Vector2(200, 380)
 neighbors = [11, 15]
-has_item = false
 
 [sub_resource type="Resource" id="Mansion"]
 script = ExtResource("2")
@@ -97,7 +86,6 @@ id = 11
 name = "Mansion"
 position = Vector2(420, 380)
 neighbors = [10, 6, 12]
-has_item = false
 
 [sub_resource type="Resource" id="Lamp"]
 script = ExtResource("2")
@@ -105,7 +93,6 @@ id = 12
 name = ""
 position = Vector2(425, 510)
 neighbors = [11, 16, 14, 18]
-has_item = false
 
 [sub_resource type="Resource" id="Docks"]
 script = ExtResource("2")
@@ -113,7 +100,6 @@ id = 13
 name = "Docks"
 position = Vector2(1300, 380)
 neighbors = [9]
-has_item = false
 
 [sub_resource type="Resource" id="Shop"]
 script = ExtResource("2")
@@ -121,7 +107,6 @@ id = 14
 name = "Shop"
 position = Vector2(640, 495)
 neighbors = [12, 17, 21]
-has_item = false
 
 [sub_resource type="Resource" id="Crypt"]
 script = ExtResource("2")
@@ -129,7 +114,6 @@ id = 15
 name = "Crypt"
 position = Vector2(100, 495)
 neighbors = [10]
-has_item = false
 
 [sub_resource type="Resource" id="Museum"]
 script = ExtResource("2")
@@ -137,7 +121,6 @@ id = 16
 name = "Museum"
 position = Vector2(280, 570)
 neighbors = [12]
-has_item = false
 
 [sub_resource type="Resource" id="Bridge2"]
 script = ExtResource("2")
@@ -145,7 +128,6 @@ id = 17
 name = ""
 position = Vector2(860, 380)
 neighbors = [8, 14]
-has_item = false
 
 [sub_resource type="Resource" id="Church"]
 script = ExtResource("2")
@@ -153,7 +135,6 @@ id = 18
 name = "Church"
 position = Vector2(532, 640)
 neighbors = [12, 19, 20]
-has_item = false
 
 [sub_resource type="Resource" id="Hospital"]
 script = ExtResource("2")
@@ -161,7 +142,6 @@ id = 19
 name = "Hospital"
 position = Vector2(422, 750)
 neighbors = [18]
-has_item = false
 
 [sub_resource type="Resource" id="Graveyard"]
 script = ExtResource("2")
@@ -169,7 +149,6 @@ id = 20
 name = "Graveyard"
 position = Vector2(642, 750)
 neighbors = [18]
-has_item = false
 
 [sub_resource type="Resource" id="Laboratory"]
 script = ExtResource("2")
@@ -177,7 +156,6 @@ id = 21
 name = "Laboratory"
 position = Vector2(780, 610)
 neighbors = [14, 22]
-has_item = false
 
 [sub_resource type="Resource" id="Institute"]
 script = ExtResource("2")
@@ -185,7 +163,6 @@ id = 22
 name = "Institute"
 position = Vector2(1000, 670)
 neighbors = [21]
-has_item = false
 
 
 [resource]
