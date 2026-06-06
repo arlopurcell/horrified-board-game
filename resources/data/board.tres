@@ -55,7 +55,7 @@ has_item = false
 script = ExtResource("2")
 id = 6
 name = ""
-position = Vector2(310, 265)
+position = Vector2(530, 265)
 neighbors = [1, 7, 11]
 has_item = false
 
@@ -63,7 +63,7 @@ has_item = false
 script = ExtResource("2")
 id = 7
 name = ""
-position = Vector2(530, 265)
+position = Vector2(750, 265)
 neighbors = [6, 2, 3, 8]
 has_item = false
 
@@ -71,7 +71,7 @@ has_item = false
 script = ExtResource("2")
 id = 8
 name = "Theatre"
-position = Vector2(750, 265)
+position = Vector2(970, 265)
 neighbors = [7, 4, 9, 17]
 has_item = false
 
@@ -79,7 +79,7 @@ has_item = false
 script = ExtResource("2")
 id = 9
 name = "Tower"
-position = Vector2(970, 265)
+position = Vector2(1190, 265)
 neighbors = [8, 13, 5]
 has_item = false
 
