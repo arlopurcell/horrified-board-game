@@ -135,7 +135,7 @@ has_item = false
 script = ExtResource("2")
 id = 16
 name = "Museum"
-position = Vector2(300, 570)
+position = Vector2(200, 570)
 neighbors = [12]
 has_item = false
 
@@ -151,7 +151,7 @@ has_item = false
 script = ExtResource("2")
 id = 18
 name = "Church"
-position = Vector2(532, 570)
+position = Vector2(532, 640)
 neighbors = [12, 19, 20]
 has_item = false
 
@@ -159,7 +159,7 @@ has_item = false
 script = ExtResource("2")
 id = 19
 name = "Hospital"
-position = Vector2(422, 680)
+position = Vector2(422, 750)
 neighbors = [18]
 has_item = false
 
@@ -167,7 +167,7 @@ has_item = false
 script = ExtResource("2")
 id = 20
 name = "Graveyard"
-position = Vector2(642, 680)
+position = Vector2(642, 750)
 neighbors = [18]
 has_item = false
 
