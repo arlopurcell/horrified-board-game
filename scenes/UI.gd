@@ -7,6 +7,8 @@ extends CanvasLayer
 @onready var inventory_list: RichTextLabel = $InventoryScroll/InventoryList
 @onready var pickup_button: Button = $PickupButton
 
+const COLOR_HEX := {"red": "#c0392b", "blue": "#2980b9", "yellow": "#d4ac0d"}
+
 func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	pickup_button.pressed.connect(_on_pickup_pressed)
@@ -76,13 +78,12 @@ func _refresh_inventory() -> void:
 	if active == null:
 		inventory_list.text = ""
 		return
-	var color_hex := {"red": "#c0392b", "blue": "#2980b9", "yellow": "#d4ac0d"}
 	var bbcode := ""
 	for item in active.inventory:
 		var item_data := item as ItemData
 		if item_data == null:
 			continue
-		var hex: String = color_hex.get(item_data.color, "#ffffff")
+		var hex: String = COLOR_HEX.get(item_data.color, "#ffffff")
 		if bbcode != "":
 			bbcode += "\n"
 		bbcode += "[color=%s]● %s  %d[/color]" % [hex, item_data.item_name, item_data.strength]

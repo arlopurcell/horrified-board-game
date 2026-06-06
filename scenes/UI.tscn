@@ -30,7 +30,6 @@ offset_bottom = 220.0
 [node name="InventoryList" type="RichTextLabel" parent="InventoryScroll"]
 layout_mode = 2
 bbcode_enabled = true
-fit_content = true
 scroll_active = false
 theme_override_font_sizes/normal_font_size = 13
 
@@ -55,6 +54,7 @@ offset_right = -220.0
 offset_bottom = -10.0
 text = "PICK UP"
 theme_override_font_sizes/font_size = 16
+disabled = true
 
 [node name="EndTurnButton" type="Button" parent="."]
 anchor_left = 1.0
