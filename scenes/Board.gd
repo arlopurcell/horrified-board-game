@@ -21,11 +21,11 @@ func _draw() -> void:
     for space_data in _board_data.spaces:
         if not space_data.id in _space_nodes:
             continue
-        var from := _space_nodes[space_data.id].position + SpaceNode.SIZE / 2
+        var from: Vector2 = (_space_nodes[space_data.id] as SpaceNode).position + SpaceNode.SIZE / 2
         for neighbor_id in space_data.neighbors:
             if neighbor_id <= space_data.id or not neighbor_id in _space_nodes:
                 continue
-            var to := _space_nodes[neighbor_id].position + SpaceNode.SIZE / 2
+            var to: Vector2 = (_space_nodes[neighbor_id] as SpaceNode).position + SpaceNode.SIZE / 2
             draw_line(from, to, CONNECTION_COLOR, CONNECTION_WIDTH, true)
 
 func get_space_center(space_id: int) -> Vector2:
