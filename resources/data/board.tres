@@ -47,7 +47,7 @@ has_item = false
 script = ExtResource("2")
 id = 5
 name = "Dungeon"
-position = Vector2(200, 265)
+position = Vector2(1300, 150)
 neighbors = [9]
 has_item = false
 
