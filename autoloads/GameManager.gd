@@ -54,7 +54,7 @@ func _place_initial_items() -> void:
             board_items[item.location] = []
         board_items[item.location].append(item)
         placed += 1
-    bag = bag.slice(12)
+    bag = bag.slice(placed)
     items_changed.emit()
 
 func try_move(space_id: int) -> bool:
@@ -102,7 +102,7 @@ func get_active_player() -> PlayerData:
 
 func get_board_items(space_id: int) -> Array:
     if board_items.has(space_id):
-        return board_items[space_id]
+        return (board_items[space_id] as Array).duplicate()
     return []
 
 func get_legal_moves() -> Array[int]:
