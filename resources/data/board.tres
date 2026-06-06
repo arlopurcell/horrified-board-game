@@ -103,7 +103,7 @@ has_item = false
 script = ExtResource("2")
 id = 12
 name = ""
-position = Vector2(350, 560)
+position = Vector2(425, 510)
 neighbors = [11, 16, 14, 18]
 has_item = false
 
