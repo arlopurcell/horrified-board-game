@@ -4,7 +4,7 @@ extends CanvasLayer
 @onready var player_roster: HBoxContainer = $PlayerRoster
 @onready var end_turn_button: Button = $EndTurnButton
 @onready var moves_indicator: Label = $MovesIndicator
-@onready var inventory_list: RichTextLabel = $InventoryScroll/InventoryList
+@onready var inventory_list: RichTextLabel = $InventoryPanel/InventoryScroll/InventoryList
 @onready var pickup_button: Button = $PickupButton
 
 const COLOR_HEX := {"red": "#c0392b", "blue": "#2980b9", "yellow": "#d4ac0d"}
