@@ -7,7 +7,6 @@ extends CanvasLayer
 @onready var inventory_list: RichTextLabel = $InventoryPanel/InventoryScroll/InventoryList
 @onready var pickup_button: Button = $PickupButton
 
-const COLOR_HEX := {"red": "#c0392b", "blue": "#2980b9", "yellow": "#d4ac0d"}
 
 func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -75,19 +74,22 @@ func _update_moves_indicator() -> void:
 
 func _refresh_inventory() -> void:
 	var active := GameManager.get_active_player()
+	inventory_list.clear()
 	if active == null:
-		inventory_list.text = ""
 		return
-	var bbcode := ""
 	for item in active.inventory:
 		var item_data := item as ItemData
 		if item_data == null:
 			continue
-		var hex: String = COLOR_HEX.get(item_data.color, "#ffffff")
-		if bbcode != "":
-			bbcode += "\n"
-		bbcode += "[color=%s]● %s  %d[/color]" % [hex, item_data.item_name, item_data.strength]
-	inventory_list.text = bbcode
+		var color: Color
+		match item_data.color:
+			"red":    color = Color(0.75, 0.22, 0.17)
+			"blue":   color = Color(0.16, 0.50, 0.73)
+			"yellow": color = Color(0.95, 0.77, 0.06)
+			_:        color = Color.WHITE
+		inventory_list.push_color(color)
+		inventory_list.add_text("● %s  %d\n" % [item_data.item_name, item_data.strength])
+		inventory_list.pop()
 
 func _refresh_pickup_button() -> void:
 	pickup_button.disabled = not GameManager.can_pickup()
