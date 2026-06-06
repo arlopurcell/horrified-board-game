@@ -175,7 +175,7 @@ has_item = false
 script = ExtResource("2")
 id = 21
 name = "Laboratory"
-position = Vector2(640, 610)
+position = Vector2(780, 610)
 neighbors = [14, 22]
 has_item = false
 
@@ -183,7 +183,7 @@ has_item = false
 script = ExtResource("2")
 id = 22
 name = "Institute"
-position = Vector2(860, 610)
+position = Vector2(1000, 670)
 neighbors = [21]
 has_item = false
 
