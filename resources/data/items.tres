@@ -1,0 +1,428 @@
+[gd_resource type="Resource" script_class="ItemBagData" load_steps=63 format=3]
+
+[ext_resource type="Script" path="res://resources/item_bag_data.gd" id="1"]
+[ext_resource type="Script" path="res://resources/item_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Item0"]
+script = ExtResource("2")
+item_name = "Silver Bullet"
+color = "red"
+strength = 6
+location = 0
+
+[sub_resource type="Resource" id="Item1"]
+script = ExtResource("2")
+item_name = "Wooden Stake"
+color = "red"
+strength = 5
+location = 3
+
+[sub_resource type="Resource" id="Item2"]
+script = ExtResource("2")
+item_name = "Holy Symbol"
+color = "red"
+strength = 4
+location = 7
+
+[sub_resource type="Resource" id="Item3"]
+script = ExtResource("2")
+item_name = "Iron Chain"
+color = "red"
+strength = 3
+location = 11
+
+[sub_resource type="Resource" id="Item4"]
+script = ExtResource("2")
+item_name = "Torch"
+color = "red"
+strength = 2
+location = 15
+
+[sub_resource type="Resource" id="Item5"]
+script = ExtResource("2")
+item_name = "Garlic Wreath"
+color = "red"
+strength = 1
+location = 18
+
+[sub_resource type="Resource" id="Item6"]
+script = ExtResource("2")
+item_name = "Flaming Arrow"
+color = "red"
+strength = 6
+location = 1
+
+[sub_resource type="Resource" id="Item7"]
+script = ExtResource("2")
+item_name = "Blood Vial"
+color = "red"
+strength = 5
+location = 4
+
+[sub_resource type="Resource" id="Item8"]
+script = ExtResource("2")
+item_name = "Fire Charm"
+color = "red"
+strength = 4
+location = 8
+
+[sub_resource type="Resource" id="Item9"]
+script = ExtResource("2")
+item_name = "Scarlet Ribbon"
+color = "red"
+strength = 3
+location = 12
+
+[sub_resource type="Resource" id="Item10"]
+script = ExtResource("2")
+item_name = "Crimson Key"
+color = "red"
+strength = 2
+location = 16
+
+[sub_resource type="Resource" id="Item11"]
+script = ExtResource("2")
+item_name = "Dragon's Blood"
+color = "red"
+strength = 1
+location = 20
+
+[sub_resource type="Resource" id="Item12"]
+script = ExtResource("2")
+item_name = "Ruby Amulet"
+color = "red"
+strength = 3
+location = 2
+
+[sub_resource type="Resource" id="Item13"]
+script = ExtResource("2")
+item_name = "Ember Stone"
+color = "red"
+strength = 4
+location = 9
+
+[sub_resource type="Resource" id="Item14"]
+script = ExtResource("2")
+item_name = "War Banner"
+color = "red"
+strength = 2
+location = 13
+
+[sub_resource type="Resource" id="Item15"]
+script = ExtResource("2")
+item_name = "Infernal Seal"
+color = "red"
+strength = 1
+location = 21
+
+[sub_resource type="Resource" id="Item16"]
+script = ExtResource("2")
+item_name = "Flame Sigil"
+color = "red"
+strength = 5
+location = 6
+
+[sub_resource type="Resource" id="Item17"]
+script = ExtResource("2")
+item_name = "Bloodstone"
+color = "red"
+strength = 6
+location = 10
+
+[sub_resource type="Resource" id="Item18"]
+script = ExtResource("2")
+item_name = "Red Lantern"
+color = "red"
+strength = 3
+location = 17
+
+[sub_resource type="Resource" id="Item19"]
+script = ExtResource("2")
+item_name = "Smoldering Brand"
+color = "red"
+strength = 2
+location = 22
+
+[sub_resource type="Resource" id="Item20"]
+script = ExtResource("2")
+item_name = "Moon Water"
+color = "blue"
+strength = 6
+location = 14
+
+[sub_resource type="Resource" id="Item21"]
+script = ExtResource("2")
+item_name = "Ancient Tome"
+color = "blue"
+strength = 5
+location = 19
+
+[sub_resource type="Resource" id="Item22"]
+script = ExtResource("2")
+item_name = "Mystic Crystal"
+color = "blue"
+strength = 4
+location = 22
+
+[sub_resource type="Resource" id="Item23"]
+script = ExtResource("2")
+item_name = "Ice Shard"
+color = "blue"
+strength = 3
+location = 0
+
+[sub_resource type="Resource" id="Item24"]
+script = ExtResource("2")
+item_name = "Storm Vial"
+color = "blue"
+strength = 2
+location = 3
+
+[sub_resource type="Resource" id="Item25"]
+script = ExtResource("2")
+item_name = "Ocean's Tear"
+color = "blue"
+strength = 1
+location = 7
+
+[sub_resource type="Resource" id="Item26"]
+script = ExtResource("2")
+item_name = "Sapphire Ring"
+color = "blue"
+strength = 6
+location = 11
+
+[sub_resource type="Resource" id="Item27"]
+script = ExtResource("2")
+item_name = "Frost Rune"
+color = "blue"
+strength = 5
+location = 15
+
+[sub_resource type="Resource" id="Item28"]
+script = ExtResource("2")
+item_name = "Night Elixir"
+color = "blue"
+strength = 4
+location = 18
+
+[sub_resource type="Resource" id="Item29"]
+script = ExtResource("2")
+item_name = "Star Map"
+color = "blue"
+strength = 3
+location = 1
+
+[sub_resource type="Resource" id="Item30"]
+script = ExtResource("2")
+item_name = "Blue Candle"
+color = "blue"
+strength = 2
+location = 4
+
+[sub_resource type="Resource" id="Item31"]
+script = ExtResource("2")
+item_name = "Moonstone"
+color = "blue"
+strength = 1
+location = 8
+
+[sub_resource type="Resource" id="Item32"]
+script = ExtResource("2")
+item_name = "Tidal Charm"
+color = "blue"
+strength = 6
+location = 12
+
+[sub_resource type="Resource" id="Item33"]
+script = ExtResource("2")
+item_name = "Azure Seal"
+color = "blue"
+strength = 5
+location = 16
+
+[sub_resource type="Resource" id="Item34"]
+script = ExtResource("2")
+item_name = "Deep Shard"
+color = "blue"
+strength = 4
+location = 20
+
+[sub_resource type="Resource" id="Item35"]
+script = ExtResource("2")
+item_name = "Void Fragment"
+color = "blue"
+strength = 3
+location = 2
+
+[sub_resource type="Resource" id="Item36"]
+script = ExtResource("2")
+item_name = "Glacial Core"
+color = "blue"
+strength = 2
+location = 5
+
+[sub_resource type="Resource" id="Item37"]
+script = ExtResource("2")
+item_name = "Shadow Lens"
+color = "blue"
+strength = 1
+location = 9
+
+[sub_resource type="Resource" id="Item38"]
+script = ExtResource("2")
+item_name = "Cobalt Vial"
+color = "blue"
+strength = 6
+location = 13
+
+[sub_resource type="Resource" id="Item39"]
+script = ExtResource("2")
+item_name = "Blue Flame"
+color = "blue"
+strength = 5
+location = 17
+
+[sub_resource type="Resource" id="Item40"]
+script = ExtResource("2")
+item_name = "Gold Doubloon"
+color = "yellow"
+strength = 6
+location = 21
+
+[sub_resource type="Resource" id="Item41"]
+script = ExtResource("2")
+item_name = "Sun Stone"
+color = "yellow"
+strength = 5
+location = 6
+
+[sub_resource type="Resource" id="Item42"]
+script = ExtResource("2")
+item_name = "Lightning Rod"
+color = "yellow"
+strength = 4
+location = 10
+
+[sub_resource type="Resource" id="Item43"]
+script = ExtResource("2")
+item_name = "Amber Crystal"
+color = "yellow"
+strength = 3
+location = 14
+
+[sub_resource type="Resource" id="Item44"]
+script = ExtResource("2")
+item_name = "Gilded Key"
+color = "yellow"
+strength = 2
+location = 19
+
+[sub_resource type="Resource" id="Item45"]
+script = ExtResource("2")
+item_name = "Bright Sigil"
+color = "yellow"
+strength = 1
+location = 22
+
+[sub_resource type="Resource" id="Item46"]
+script = ExtResource("2")
+item_name = "Solar Charm"
+color = "yellow"
+strength = 6
+location = 0
+
+[sub_resource type="Resource" id="Item47"]
+script = ExtResource("2")
+item_name = "Canary Feather"
+color = "yellow"
+strength = 5
+location = 3
+
+[sub_resource type="Resource" id="Item48"]
+script = ExtResource("2")
+item_name = "Honey Vial"
+color = "yellow"
+strength = 4
+location = 7
+
+[sub_resource type="Resource" id="Item49"]
+script = ExtResource("2")
+item_name = "Topaz Ring"
+color = "yellow"
+strength = 3
+location = 11
+
+[sub_resource type="Resource" id="Item50"]
+script = ExtResource("2")
+item_name = "Sunbeam Shard"
+color = "yellow"
+strength = 2
+location = 15
+
+[sub_resource type="Resource" id="Item51"]
+script = ExtResource("2")
+item_name = "Fool's Gold"
+color = "yellow"
+strength = 1
+location = 18
+
+[sub_resource type="Resource" id="Item52"]
+script = ExtResource("2")
+item_name = "Golden Thread"
+color = "yellow"
+strength = 6
+location = 1
+
+[sub_resource type="Resource" id="Item53"]
+script = ExtResource("2")
+item_name = "Radiant Seal"
+color = "yellow"
+strength = 5
+location = 4
+
+[sub_resource type="Resource" id="Item54"]
+script = ExtResource("2")
+item_name = "Citrine Stone"
+color = "yellow"
+strength = 4
+location = 8
+
+[sub_resource type="Resource" id="Item55"]
+script = ExtResource("2")
+item_name = "Harvest Token"
+color = "yellow"
+strength = 3
+location = 12
+
+[sub_resource type="Resource" id="Item56"]
+script = ExtResource("2")
+item_name = "Brass Compass"
+color = "yellow"
+strength = 2
+location = 16
+
+[sub_resource type="Resource" id="Item57"]
+script = ExtResource("2")
+item_name = "Gilded Rune"
+color = "yellow"
+strength = 1
+location = 20
+
+[sub_resource type="Resource" id="Item58"]
+script = ExtResource("2")
+item_name = "Daybreak Charm"
+color = "yellow"
+strength = 6
+location = 2
+
+[sub_resource type="Resource" id="Item59"]
+script = ExtResource("2")
+item_name = "Amber Dust"
+color = "yellow"
+strength = 5
+location = 5
+
+[resource]
+script = ExtResource("1")
+items = [SubResource("Item0"), SubResource("Item1"), SubResource("Item2"), SubResource("Item3"), SubResource("Item4"), SubResource("Item5"), SubResource("Item6"), SubResource("Item7"), SubResource("Item8"), SubResource("Item9"), SubResource("Item10"), SubResource("Item11"), SubResource("Item12"), SubResource("Item13"), SubResource("Item14"), SubResource("Item15"), SubResource("Item16"), SubResource("Item17"), SubResource("Item18"), SubResource("Item19"), SubResource("Item20"), SubResource("Item21"), SubResource("Item22"), SubResource("Item23"), SubResource("Item24"), SubResource("Item25"), SubResource("Item26"), SubResource("Item27"), SubResource("Item28"), SubResource("Item29"), SubResource("Item30"), SubResource("Item31"), SubResource("Item32"), SubResource("Item33"), SubResource("Item34"), SubResource("Item35"), SubResource("Item36"), SubResource("Item37"), SubResource("Item38"), SubResource("Item39"), SubResource("Item40"), SubResource("Item41"), SubResource("Item42"), SubResource("Item43"), SubResource("Item44"), SubResource("Item45"), SubResource("Item46"), SubResource("Item47"), SubResource("Item48"), SubResource("Item49"), SubResource("Item50"), SubResource("Item51"), SubResource("Item52"), SubResource("Item53"), SubResource("Item54"), SubResource("Item55"), SubResource("Item56"), SubResource("Item57"), SubResource("Item58"), SubResource("Item59")]
