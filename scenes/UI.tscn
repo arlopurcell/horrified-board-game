@@ -43,6 +43,7 @@ offset_top = 26.0
 [node name="InventoryList" type="RichTextLabel" parent="InventoryPanel/InventoryScroll"]
 layout_mode = 2
 bbcode_enabled = true
+fit_content = true
 scroll_active = false
 theme_override_font_sizes/normal_font_size = 13
 
