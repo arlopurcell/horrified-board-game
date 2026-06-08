@@ -71,7 +71,7 @@ func try_move(space_id: int) -> bool:
     return true
 
 func end_turn() -> void:
-    if players.is_empty():
+    if players.is_empty() or phase_running:
         return
     phase_running = true
     MonsterManager.run_phase()
