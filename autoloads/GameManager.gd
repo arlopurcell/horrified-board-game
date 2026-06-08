@@ -19,6 +19,7 @@ var moves_remaining: int = 0
 var board_data: BoardData = null
 var bag: Array[ItemData] = []
 var board_items: Dictionary = {}    # space_id (int) -> Array[ItemData]
+var phase_running: bool = false
 
 func start_game(player_count: int) -> void:
     player_count = clampi(player_count, 2, 4)
@@ -58,7 +59,7 @@ func _place_initial_items() -> void:
     items_changed.emit()
 
 func try_move(space_id: int) -> bool:
-    if moves_remaining <= 0 or players.is_empty() or board_data == null:
+    if phase_running or moves_remaining <= 0 or players.is_empty() or board_data == null:
         return false
     var current_player := players[active_player_index]
     var current_space := board_data.get_space(current_player.current_space_id)
@@ -72,8 +73,10 @@ func try_move(space_id: int) -> bool:
 func end_turn() -> void:
     if players.is_empty():
         return
-    # Run phase before advancing so active_player_index still refers to the player who just finished.
+    phase_running = true
     MonsterManager.run_phase()
+    await MonsterManager.phase_animation_done
+    phase_running = false
     active_player_index = (active_player_index + 1) % players.size()
     moves_remaining = MOVES_PER_TURN
     turn_changed.emit(active_player_index)
