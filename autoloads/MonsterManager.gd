@@ -36,6 +36,7 @@ func run_phase() -> void:
 				monster = m
 				break
 		if monster == null:
+			push_warning("MonsterManager: card references unknown monster '%s'" % monster_name)
 			continue
 		var target_space := _nearest_player_space(monster.current_space_id)
 		if target_space == -1:
@@ -46,6 +47,7 @@ func run_phase() -> void:
 		if path.is_empty():
 			destination = monster.current_space_id
 		else:
+			# path has one element when already at target; monster stays and attacks
 			destination = path[mini(card.move_steps, path.size() - 1)]
 		monster.current_space_id = destination
 		var dest_space := GameManager.board_data.get_space(destination)
