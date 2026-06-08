@@ -1,6 +1,7 @@
 extends Node
 
-signal monsters_moved
+signal monsters_moved(move_data: Array)
+signal phase_animation_done
 signal phase_completed(summary: String)
 
 var monsters: Array[MonsterData] = []
@@ -25,12 +26,14 @@ func run_phase() -> void:
 		draw_pile.shuffle()
 		discard_pile.clear()
 	if draw_pile.is_empty():
+		monsters_moved.emit([])
 		phase_completed.emit("")
 		return
 	var card := draw_pile.pop_front() as MonsterCardData
 	discard_pile.append(card)
 	GameManager.draw_items_to_board(card.items_to_draw)
 	var summary_parts: Array[String] = []
+	var move_data: Array = []
 	for monster_name: String in card.monster_names:
 		var monster: MonsterData = null
 		for m in monsters:
@@ -49,8 +52,13 @@ func run_phase() -> void:
 		if path.is_empty():
 			destination = monster.current_space_id
 		else:
-			# path has one element when already at target; monster stays and attacks
-			destination = path[mini(card.move_steps, path.size() - 1)]
+			var dest_idx := mini(card.move_steps, path.size() - 1)
+			destination = path[dest_idx]
+			if dest_idx > 0:
+				move_data.append({
+					"monster_idx": monsters.find(monster),
+					"path": path.slice(0, dest_idx + 1)
+				})
 		monster.current_space_id = destination
 		var dest_space := GameManager.board_data.get_space(destination)
 		var dest_name := dest_space.name if dest_space != null else str(destination)
@@ -68,7 +76,7 @@ func run_phase() -> void:
 			summary_parts.append(monster.monster_name + " moved to " + dest_name +
 				", rolled " + str(card.attack_dice) + " " + die_word +
 				" → " + str(hits) + " " + hit_word)
-	monsters_moved.emit()
+	monsters_moved.emit(move_data)
 	phase_completed.emit(" | ".join(summary_parts))
 
 
