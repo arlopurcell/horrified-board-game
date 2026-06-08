@@ -8,8 +8,11 @@ const BORDER_COLOR := Color(0.80, 0.10, 0.10)
 func setup(_data: MonsterData) -> void:
 	queue_redraw()
 
-func move_to(world_pos: Vector2) -> void:
-	position = world_pos
+func move_to(world_pos: Vector2) -> Tween:
+	var tween := create_tween()
+	tween.tween_property(self, "position", world_pos, 0.25) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return tween
 
 func _draw() -> void:
 	draw_circle(Vector2.ZERO, RADIUS, FILL_COLOR)
