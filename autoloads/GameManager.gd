@@ -72,7 +72,7 @@ func try_move(space_id: int) -> bool:
 func end_turn() -> void:
     if players.is_empty():
         return
-    # Players may end their turn early — unused moves are forfeited by design.
+    MonsterManager.run_phase()
     active_player_index = (active_player_index + 1) % players.size()
     moves_remaining = MOVES_PER_TURN
     turn_changed.emit(active_player_index)
@@ -104,6 +104,17 @@ func get_board_items(space_id: int) -> Array:
     if board_items.has(space_id):
         return (board_items[space_id] as Array).duplicate()
     return []
+
+func draw_items_to_board(count: int) -> void:
+    var drawn := 0
+    while drawn < count and not bag.is_empty():
+        var item := bag.pop_front() as ItemData
+        if not board_items.has(item.location):
+            board_items[item.location] = []
+        board_items[item.location].append(item)
+        drawn += 1
+    if drawn > 0:
+        items_changed.emit()
 
 func get_legal_moves() -> Array[int]:
     if moves_remaining <= 0 or players.is_empty() or board_data == null:
