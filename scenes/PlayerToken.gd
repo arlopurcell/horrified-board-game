@@ -10,8 +10,11 @@ func setup(data: PlayerData) -> void:
 	_color = data.color
 	queue_redraw()
 
-func move_to(world_pos: Vector2) -> void:
-	position = world_pos
+func move_to(world_pos: Vector2) -> Tween:
+	var tween := create_tween()
+	tween.tween_property(self, "position", world_pos, 0.25) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return tween
 
 func _draw() -> void:
 	draw_circle(Vector2.ZERO, RADIUS, _color)
