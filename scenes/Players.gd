@@ -4,6 +4,7 @@ const PlayerTokenScene := preload("res://scenes/PlayerToken.tscn")
 
 var _tokens: Array[PlayerToken] = []
 var _board: Board = null
+var _move_tween: Tween = null
 
 func setup(player_list: Array[PlayerData], board: Board) -> void:
 	_board = board
@@ -17,11 +18,17 @@ func setup(player_list: Array[PlayerData], board: Board) -> void:
 	_place_all_tokens()
 
 func _on_player_moved(player_index: int, _space_id: int) -> void:
+	if GameManager.players.size() != _tokens.size():
+		push_error("Players.gd: token/player count mismatch")
+		return
+	if _move_tween and _move_tween.is_running():
+		_move_tween.kill()
 	var positions := _compute_positions()
-	await _tokens[player_index].move_to(positions[player_index]).finished
 	for i in range(_tokens.size()):
 		if i != player_index:
 			_tokens[i].position = positions[i]
+	_move_tween = _tokens[player_index].move_to(positions[player_index])
+	await _move_tween.finished
 
 func _on_turn_changed(_player_index: int) -> void:
 	_place_all_tokens()
