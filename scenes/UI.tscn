@@ -21,6 +21,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 22
 
+[node name="MonsterLog" type="Label" parent="."]
+anchor_right = 1.0
+offset_top = 88.0
+offset_bottom = 108.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
 [node name="InventoryPanel" type="Panel" parent="."]
 offset_left = 10.0
 offset_top = 90.0
@@ -28,23 +35,20 @@ offset_right = 300.0
 offset_bottom = 255.0
 
 [node name="InventoryHeader" type="Label" parent="InventoryPanel"]
-anchor_right = 1.0
+offset_left = 0.0
 offset_top = 4.0
+offset_right = 290.0
 offset_bottom = 24.0
 text = "Inventory"
 theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 
-[node name="InventoryScroll" type="ScrollContainer" parent="InventoryPanel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 26.0
-
-[node name="InventoryList" type="RichTextLabel" parent="InventoryPanel/InventoryScroll"]
-layout_mode = 2
-anchor_right = 1.0
+[node name="InventoryList" type="RichTextLabel" parent="InventoryPanel"]
+offset_left = 4.0
+offset_top = 28.0
+offset_right = 286.0
+offset_bottom = 160.0
 bbcode_enabled = true
-fit_content = true
 scroll_active = false
 theme_override_font_sizes/normal_font_size = 13
 

@@ -4,7 +4,8 @@ extends CanvasLayer
 @onready var player_roster: HBoxContainer = $PlayerRoster
 @onready var end_turn_button: Button = $EndTurnButton
 @onready var moves_indicator: Label = $MovesIndicator
-@onready var inventory_list: RichTextLabel = $InventoryPanel/InventoryScroll/InventoryList
+@onready var monster_log: Label = $MonsterLog
+@onready var inventory_list: RichTextLabel = $InventoryPanel/InventoryList
 @onready var pickup_button: Button = $PickupButton
 
 
@@ -14,6 +15,7 @@ func _ready() -> void:
 	GameManager.turn_changed.connect(_on_turn_changed)
 	GameManager.player_moved.connect(_on_player_moved)
 	GameManager.items_changed.connect(_on_items_changed)
+	MonsterManager.phase_completed.connect(_on_phase_completed)
 
 func setup(player_list: Array[PlayerData]) -> void:
 	for child in player_roster.get_children():
@@ -43,6 +45,9 @@ func _on_player_moved(_player_index: int, _space_id: int) -> void:
 func _on_items_changed() -> void:
 	_refresh_inventory()
 	_refresh_pickup_button()
+
+func _on_phase_completed(summary: String) -> void:
+	monster_log.text = summary
 
 func _refresh_turn_display() -> void:
 	var active := GameManager.get_active_player()
