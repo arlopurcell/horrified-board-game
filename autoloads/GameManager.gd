@@ -72,6 +72,7 @@ func try_move(space_id: int) -> bool:
 func end_turn() -> void:
     if players.is_empty():
         return
+    # Run phase before advancing so active_player_index still refers to the player who just finished.
     MonsterManager.run_phase()
     active_player_index = (active_player_index + 1) % players.size()
     moves_remaining = MOVES_PER_TURN

@@ -18,6 +18,8 @@ func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void
 
 
 func run_phase() -> void:
+	if monsters.is_empty():
+		return
 	if draw_pile.is_empty():
 		draw_pile = discard_pile.duplicate()
 		draw_pile.shuffle()
