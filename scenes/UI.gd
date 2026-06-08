@@ -30,12 +30,15 @@ func setup(player_list: Array[PlayerData]) -> void:
 	_refresh_turn_display()
 
 func _on_end_turn_pressed() -> void:
+	end_turn_button.disabled = true
+	pickup_button.disabled = true
 	GameManager.end_turn()
 
 func _on_pickup_pressed() -> void:
 	GameManager.try_pickup()
 
 func _on_turn_changed(_player_index: int) -> void:
+	end_turn_button.disabled = false
 	_refresh_turn_display()
 
 func _on_player_moved(_player_index: int, _space_id: int) -> void:
