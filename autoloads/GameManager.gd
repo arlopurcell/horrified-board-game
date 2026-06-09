@@ -165,6 +165,9 @@ func try_advance(items: Array[ItemData]) -> bool:
         return false
     var current_player := players[active_player_index]
     for item in items:
+        if not current_player.inventory.has(item):
+            return false
+    for item in items:
         current_player.inventory.erase(item)
     dracula_coffins[current_player.current_space_id] = true
     moves_remaining -= 1
@@ -199,6 +202,9 @@ func try_defeat(items: Array[ItemData]) -> bool:
     if total < 6:
         return false
     var current_player := players[active_player_index]
+    for item in items:
+        if not current_player.inventory.has(item):
+            return false
     for item in items:
         current_player.inventory.erase(item)
     moves_remaining -= 1
