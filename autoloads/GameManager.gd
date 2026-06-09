@@ -20,6 +20,11 @@ var board_data: BoardData = null
 var bag: Array[ItemData] = []
 var board_items: Dictionary = {}    # space_id (int) -> Array[ItemData]
 var phase_running: bool = false
+var dracula_coffins: Dictionary = {}   # space_id (int) -> smashed (bool)
+var game_over: bool = false
+
+signal monster_defeated(monster_name: String)
+signal game_won
 
 func start_game(player_count: int) -> void:
     player_count = clampi(player_count, 2, 4)
@@ -37,6 +42,11 @@ func start_game(player_count: int) -> void:
     active_player_index = 0
     moves_remaining = MOVES_PER_TURN
     board_items.clear()
+    game_over = false
+    dracula_coffins.clear()
+    for space in board_data.spaces:
+        if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
+            dracula_coffins[space.id] = false
     _place_initial_items()
     turn_changed.emit(0)
 
@@ -59,7 +69,7 @@ func _place_initial_items() -> void:
     items_changed.emit()
 
 func try_move(space_id: int) -> bool:
-    if phase_running or moves_remaining <= 0 or players.is_empty() or board_data == null:
+    if game_over or phase_running or moves_remaining <= 0 or players.is_empty() or board_data == null:
         return false
     var current_player := players[active_player_index]
     var current_space := board_data.get_space(current_player.current_space_id)
@@ -71,7 +81,7 @@ func try_move(space_id: int) -> bool:
     return true
 
 func end_turn() -> void:
-    if players.is_empty() or phase_running:
+    if players.is_empty() or phase_running or game_over:
         return
     phase_running = true
     MonsterManager.run_phase()
