@@ -18,6 +18,14 @@ func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void
 		monster.current_space_id = monster.starting_space_id
 
 
+func remove_monster(monster_name: String) -> void:
+	for i in range(monsters.size() - 1, -1, -1):
+		if monsters[i].monster_name == monster_name:
+			monsters.remove_at(i)
+			return
+	push_warning("MonsterManager.remove_monster: '%s' not found" % monster_name)
+
+
 func run_phase() -> void:
 	if monsters.is_empty():
 		monsters_moved.emit([])
