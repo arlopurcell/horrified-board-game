@@ -3,6 +3,8 @@ extends Node
 signal monsters_moved(move_data: Array)
 signal phase_animation_done
 signal phase_completed(summary: String)
+signal dice_rolled(results: Array)
+signal dice_animation_done
 
 var monsters: Array[MonsterData] = []
 var draw_pile: Array[MonsterCardData] = []
@@ -43,6 +45,7 @@ func run_phase() -> void:
 	GameManager.draw_items_to_board(card.items_to_draw)
 	var summary_parts: Array[String] = []
 	var move_data: Array = []
+	var attack_dice: Array = []
 	for monster_name: String in card.monster_names:
 		var monster: MonsterData = null
 		for m in monsters:
@@ -79,18 +82,24 @@ func run_phase() -> void:
 		if not players_here:
 			summary_parts.append(monster.monster_name + " moved to " + dest_name)
 		else:
-			var roll := _roll_dice(card.attack_dice)
-			var hits: int = roll["hits"]
+			var dice_results := _roll_dice(card.attack_dice)
+			attack_dice.append_array(dice_results)
+			var hits := dice_results.count("hit")
+			var power_triggered := dice_results.has("power")
 			var die_word := "die" if card.attack_dice == 1 else "dice"
 			var hit_word := "hit" if hits == 1 else "hits"
 			var atk_text := monster.monster_name + " moved to " + dest_name + \
 				", rolled " + str(card.attack_dice) + " " + die_word + \
 				" → " + str(hits) + " " + hit_word
-			if roll["power"]:
+			if power_triggered:
 				var power_note := _trigger_power(monster)
 				atk_text += " [POWER: " + power_note + "]"
 			summary_parts.append(atk_text)
 	monsters_moved.emit(move_data)
+	await phase_animation_done
+	if not attack_dice.is_empty():
+		dice_rolled.emit(attack_dice)
+		await dice_animation_done
 	phase_completed.emit(" | ".join(summary_parts))
 
 
@@ -148,17 +157,17 @@ func _bfs_path(from_id: int, to_id: int) -> Array[int]:
 	return []
 
 
-func _roll_dice(count: int) -> Dictionary:
-	var hits := 0
-	var power := false
+func _roll_dice(count: int) -> Array[String]:
+	var results: Array[String] = []
 	for i in range(count):
 		var face := randi() % 6
-		if face < 2:       # 0-1: hit  (2/6)
-			hits += 1
-		elif face == 5:    # 5: power  (1/6)
-			power = true
-		# 2-4: miss        (3/6)
-	return {"hits": hits, "power": power}
+		if face < 2:        # 0-1: hit   (2/6)
+			results.append("hit")
+		elif face == 5:     # 5:   power (1/6)
+			results.append("power")
+		else:               # 2-4: miss  (3/6)
+			results.append("miss")
+	return results
 
 
 func _trigger_power(monster: MonsterData) -> String:
@@ -176,4 +185,4 @@ func _power_dracula(dracula: MonsterData) -> String:
 	GameManager.player_moved.emit(GameManager.active_player_index, dracula.current_space_id)
 	var space := GameManager.board_data.get_space(dracula.current_space_id)
 	var space_name: String = space.name if space != null else str(dracula.current_space_id)
-	return target.player_name + " dragged to " + space_name
+	return target.display_name + " dragged to " + space_name

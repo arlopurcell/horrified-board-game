@@ -4,9 +4,11 @@ const MonsterTokenScene := preload("res://scenes/MonsterToken.tscn")
 
 var _tokens: Array[MonsterToken] = []
 var _board: Board = null
+var _camera: Camera2D = null
 
-func setup(monster_list: Array[MonsterData], board: Board) -> void:
+func setup(monster_list: Array[MonsterData], board: Board, camera: Camera2D = null) -> void:
 	_board = board
+	_camera = camera
 	for monster in monster_list:
 		var token: MonsterToken = MonsterTokenScene.instantiate()
 		add_child(token)
@@ -33,7 +35,11 @@ func _on_monsters_moved(move_data: Array) -> void:
 		var idx: int = entry["monster_idx"]
 		var path: Array = entry["path"]
 		for i in range(1, path.size()):
-			await _tokens[idx].move_to(_board.get_space_center(path[i])).finished
+			var target := _board.get_space_center(path[i])
+			if _camera != null:
+				create_tween().tween_property(_camera, "position", target, MonsterToken.MOVE_DURATION) \
+					.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			await _tokens[idx].move_to(target).finished
 	_place_all_tokens()
 	# Defer one frame so phase_animation_done always fires after end_turn()'s await is set up,
 	# even when move_data is empty and this handler ran synchronously.

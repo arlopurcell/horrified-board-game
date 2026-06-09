@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/character_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+character_name = "Mayor"
+actions_per_turn = 5
+starting_space_name = "Theatre"
+special_id = ""

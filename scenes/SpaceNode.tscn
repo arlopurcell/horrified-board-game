@@ -9,6 +9,7 @@ size = Vector2(100, 80)
 script = ExtResource("1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(50, 40)
 shape = SubResource("1")
 
 [node name="NameLabel" type="Label" parent="."]

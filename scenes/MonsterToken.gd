@@ -2,6 +2,7 @@ class_name MonsterToken
 extends Node2D
 
 const HALF := 13.0
+const MOVE_DURATION := 0.75
 const FILL_COLOR := Color(0.15, 0.10, 0.10)
 const BORDER_COLOR := Color(0.80, 0.10, 0.10)
 const LABEL_COLOR := Color.WHITE
@@ -15,7 +16,7 @@ func setup(data: MonsterData) -> void:
 
 func move_to(world_pos: Vector2) -> Tween:
 	var tween := create_tween()
-	tween.tween_property(self, "position", world_pos, 0.25) \
+	tween.tween_property(self, "position", world_pos, MOVE_DURATION) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	return tween
 
