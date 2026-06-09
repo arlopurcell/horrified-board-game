@@ -79,12 +79,17 @@ func run_phase() -> void:
 		if not players_here:
 			summary_parts.append(monster.monster_name + " moved to " + dest_name)
 		else:
-			var hits := _roll_dice(card.attack_dice)
+			var roll := _roll_dice(card.attack_dice)
+			var hits: int = roll["hits"]
 			var die_word := "die" if card.attack_dice == 1 else "dice"
 			var hit_word := "hit" if hits == 1 else "hits"
-			summary_parts.append(monster.monster_name + " moved to " + dest_name +
-				", rolled " + str(card.attack_dice) + " " + die_word +
-				" → " + str(hits) + " " + hit_word)
+			var atk_text := monster.monster_name + " moved to " + dest_name + \
+				", rolled " + str(card.attack_dice) + " " + die_word + \
+				" → " + str(hits) + " " + hit_word
+			if roll["power"]:
+				var power_note := _trigger_power(monster)
+				atk_text += " [POWER: " + power_note + "]"
+			summary_parts.append(atk_text)
 	monsters_moved.emit(move_data)
 	phase_completed.emit(" | ".join(summary_parts))
 
@@ -143,9 +148,32 @@ func _bfs_path(from_id: int, to_id: int) -> Array[int]:
 	return []
 
 
-func _roll_dice(count: int) -> int:
+func _roll_dice(count: int) -> Dictionary:
 	var hits := 0
+	var power := false
 	for i in range(count):
-		if randi() % 6 + 1 <= 3:
+		var face := randi() % 6
+		if face < 2:       # 0-1: hit  (2/6)
 			hits += 1
-	return hits
+		elif face == 5:    # 5: power  (1/6)
+			power = true
+		# 2-4: miss        (3/6)
+	return {"hits": hits, "power": power}
+
+
+func _trigger_power(monster: MonsterData) -> String:
+	match monster.monster_name:
+		"Dracula":
+			return _power_dracula(monster)
+	return ""
+
+
+func _power_dracula(dracula: MonsterData) -> String:
+	if GameManager.players.is_empty():
+		return ""
+	var target := GameManager.players[GameManager.active_player_index]
+	target.current_space_id = dracula.current_space_id
+	GameManager.player_moved.emit(GameManager.active_player_index, dracula.current_space_id)
+	var space := GameManager.board_data.get_space(dracula.current_space_id)
+	var space_name: String = space.name if space != null else str(dracula.current_space_id)
+	return target.player_name + " dragged to " + space_name
