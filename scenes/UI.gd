@@ -52,6 +52,7 @@ func _on_end_turn_pressed() -> void:
 
 func _on_pickup_pressed() -> void:
 	GameManager.try_pickup()
+	_refresh_action_buttons()
 
 func _on_advance_pressed() -> void:
 	var active := GameManager.get_active_player()
