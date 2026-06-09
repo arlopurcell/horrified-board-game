@@ -86,3 +86,36 @@ offset_right = -20.0
 offset_bottom = -10.0
 text = "END TURN"
 theme_override_font_sizes/font_size = 16
+
+[node name="AdvanceButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 260.0
+offset_right = 155.0
+offset_bottom = 300.0
+text = "ADVANCE TASK"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="DefeatButton" type="Button" parent="."]
+offset_left = 160.0
+offset_top = 260.0
+offset_right = 300.0
+offset_bottom = 300.0
+text = "DEFEAT MONSTER"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="GameWonLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -50.0
+offset_right = 200.0
+offset_bottom = 50.0
+text = "You Win!"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 64
+visible = false
