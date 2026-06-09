@@ -13,7 +13,20 @@ func setup(monster_list: Array[MonsterData], board: Board) -> void:
 		token.setup(monster)
 		_tokens.append(token)
 	MonsterManager.monsters_moved.connect(_on_monsters_moved)
+	GameManager.monster_defeated.connect(_on_monster_defeated)
 	_place_all_tokens()
+
+func _on_monster_defeated(monster_name: String) -> void:
+	var idx := -1
+	for i in range(MonsterManager.monsters.size()):
+		if MonsterManager.monsters[i].monster_name == monster_name:
+			idx = i
+			break
+	if idx == -1:
+		push_error("Monsters.gd: no monster named '%s' found for removal" % monster_name)
+		return
+	_tokens[idx].queue_free()
+	_tokens.remove_at(idx)
 
 func _on_monsters_moved(move_data: Array) -> void:
 	for entry in move_data:
