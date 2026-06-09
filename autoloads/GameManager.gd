@@ -138,3 +138,74 @@ func get_legal_moves() -> Array[int]:
     if current_space == null:
         return []
     return current_space.neighbors.duplicate()
+
+func _get_dracula() -> MonsterData:
+    for m in MonsterManager.monsters:
+        if m.monster_name == "Dracula":
+            return m
+    return null
+
+func can_advance() -> bool:
+    if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+        return false
+    if _get_dracula() == null:
+        return false
+    var space_id := players[active_player_index].current_space_id
+    return dracula_coffins.has(space_id) and dracula_coffins[space_id] == false
+
+func try_advance(items: Array[ItemData]) -> bool:
+    if not can_advance():
+        return false
+    var total := 0
+    for item in items:
+        if item.color != "red":
+            return false
+        total += item.strength
+    if total < 6:
+        return false
+    var current_player := players[active_player_index]
+    for item in items:
+        current_player.inventory.erase(item)
+    dracula_coffins[current_player.current_space_id] = true
+    moves_remaining -= 1
+    items_changed.emit()
+    var all_smashed := true
+    for smashed in dracula_coffins.values():
+        if not smashed:
+            all_smashed = false
+            break
+    if all_smashed:
+        var dracula := _get_dracula()
+        if dracula != null:
+            dracula.task_complete = true
+    return true
+
+func can_defeat() -> bool:
+    if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+        return false
+    var dracula := _get_dracula()
+    if dracula == null or not dracula.task_complete:
+        return false
+    return players[active_player_index].current_space_id == dracula.current_space_id
+
+func try_defeat(items: Array[ItemData]) -> bool:
+    if not can_defeat():
+        return false
+    var total := 0
+    for item in items:
+        if item.color != "yellow":
+            return false
+        total += item.strength
+    if total < 6:
+        return false
+    var current_player := players[active_player_index]
+    for item in items:
+        current_player.inventory.erase(item)
+    moves_remaining -= 1
+    items_changed.emit()
+    monster_defeated.emit("Dracula")
+    MonsterManager.remove_monster("Dracula")
+    if MonsterManager.monsters.is_empty():
+        game_over = true
+        game_won.emit()
+    return true
