@@ -1,0 +1,99 @@
+class_name ItemSelectionPanel
+extends PanelContainer
+
+signal confirmed(selected_items: Array[ItemData])
+signal cancelled
+
+const REQUIRED_STRENGTH := 6
+
+var _items: Array[ItemData] = []
+var _checkboxes: Array[CheckBox] = []
+var _total_label: Label
+var _confirm_btn: Button
+var _item_list: VBoxContainer
+
+func _ready() -> void:
+	visible = false
+	anchor_left = 0.5
+	anchor_top = 0.5
+	anchor_right = 0.5
+	anchor_bottom = 0.5
+	offset_left = -210.0
+	offset_top = -220.0
+	offset_right = 210.0
+	offset_bottom = 220.0
+
+	var vbox := VBoxContainer.new()
+	add_child(vbox)
+
+	var title := Label.new()
+	title.text = "Select Items to Discard"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 16)
+	vbox.add_child(title)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(380, 250)
+	vbox.add_child(scroll)
+
+	_item_list = VBoxContainer.new()
+	scroll.add_child(_item_list)
+
+	_total_label = Label.new()
+	_total_label.text = "Total strength: 0 / 6 required"
+	_total_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(_total_label)
+
+	var btn_row := HBoxContainer.new()
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(btn_row)
+
+	var cancel_btn := Button.new()
+	cancel_btn.text = "Cancel"
+	cancel_btn.custom_minimum_size = Vector2(120, 36)
+	cancel_btn.pressed.connect(_on_cancelled)
+	btn_row.add_child(cancel_btn)
+
+	_confirm_btn = Button.new()
+	_confirm_btn.text = "Confirm"
+	_confirm_btn.custom_minimum_size = Vector2(120, 36)
+	_confirm_btn.disabled = true
+	_confirm_btn.pressed.connect(_on_confirmed)
+	btn_row.add_child(_confirm_btn)
+
+func open(items: Array[ItemData]) -> void:
+	_items = items
+	_checkboxes.clear()
+	for child in _item_list.get_children():
+		child.queue_free()
+	for item in items:
+		var cb := CheckBox.new()
+		cb.text = "%s  (str %d)" % [item.item_name, item.strength]
+		cb.toggled.connect(_on_toggled)
+		_item_list.add_child(cb)
+		_checkboxes.append(cb)
+	_update_total()
+	visible = true
+
+func _on_toggled(_pressed: bool) -> void:
+	_update_total()
+
+func _update_total() -> void:
+	var total := 0
+	for i in range(_checkboxes.size()):
+		if _checkboxes[i].button_pressed:
+			total += _items[i].strength
+	_total_label.text = "Total strength: %d / %d required" % [total, REQUIRED_STRENGTH]
+	_confirm_btn.disabled = total < REQUIRED_STRENGTH
+
+func _on_confirmed() -> void:
+	var selected: Array[ItemData] = []
+	for i in range(_checkboxes.size()):
+		if _checkboxes[i].button_pressed:
+			selected.append(_items[i])
+	visible = false
+	confirmed.emit(selected)
+
+func _on_cancelled() -> void:
+	visible = false
+	cancelled.emit()
