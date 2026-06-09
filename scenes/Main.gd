@@ -5,9 +5,9 @@ const CAMERA_SPEED := 400.0
 
 func _ready() -> void:
 	GameManager.start_game(PLAYER_COUNT)
-	var base_monster := load("res://resources/data/base_monster.tres") as MonsterData
+	var dracula := load("res://resources/data/dracula.tres") as MonsterData
 	var deck_data := load("res://resources/data/monster_deck.tres") as MonsterDeckData
-	MonsterManager.setup([base_monster], deck_data)
+	MonsterManager.setup([dracula], deck_data)
 	$UI.setup(GameManager.players)
 	$Players.setup(GameManager.players, $Board)
 	$Monsters.setup(MonsterManager.monsters, $Board)
