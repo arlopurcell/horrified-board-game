@@ -9,7 +9,7 @@ items_to_draw = 1
 card_name = "Lurking in Shadows"
 move_steps = 2
 attack_dice = 1
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card1"]
 script = ExtResource("2")
@@ -17,7 +17,7 @@ items_to_draw = 2
 card_name = "Frenzied Hunt"
 move_steps = 1
 attack_dice = 2
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card2"]
 script = ExtResource("2")
@@ -25,7 +25,7 @@ items_to_draw = 0
 card_name = "Swift Pursuit"
 move_steps = 3
 attack_dice = 2
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card3"]
 script = ExtResource("2")
@@ -33,7 +33,7 @@ items_to_draw = 1
 card_name = "Night Stalker"
 move_steps = 2
 attack_dice = 2
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card4"]
 script = ExtResource("2")
@@ -41,7 +41,7 @@ items_to_draw = 3
 card_name = "Gathering Darkness"
 move_steps = 1
 attack_dice = 1
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card5"]
 script = ExtResource("2")
@@ -49,7 +49,7 @@ items_to_draw = 2
 card_name = "Savage Attack"
 move_steps = 2
 attack_dice = 3
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card6"]
 script = ExtResource("2")
@@ -57,7 +57,7 @@ items_to_draw = 0
 card_name = "Stealthy Approach"
 move_steps = 2
 attack_dice = 1
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card7"]
 script = ExtResource("2")
@@ -65,7 +65,7 @@ items_to_draw = 1
 card_name = "Relentless Chase"
 move_steps = 3
 attack_dice = 2
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card8"]
 script = ExtResource("2")
@@ -73,7 +73,7 @@ items_to_draw = 2
 card_name = "Thunderous Strike"
 move_steps = 1
 attack_dice = 3
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [sub_resource type="Resource" id="Card9"]
 script = ExtResource("2")
@@ -81,7 +81,7 @@ items_to_draw = 1
 card_name = "Midnight Rampage"
 move_steps = 2
 attack_dice = 2
-monster_names = ["The Creature"]
+monster_names = ["Dracula"]
 
 [resource]
 script = ExtResource("1")

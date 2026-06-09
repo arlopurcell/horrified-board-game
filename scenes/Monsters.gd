@@ -35,6 +35,9 @@ func _on_monsters_moved(move_data: Array) -> void:
 		for i in range(1, path.size()):
 			await _tokens[idx].move_to(_board.get_space_center(path[i])).finished
 	_place_all_tokens()
+	# Defer one frame so phase_animation_done always fires after end_turn()'s await is set up,
+	# even when move_data is empty and this handler ran synchronously.
+	await get_tree().process_frame
 	MonsterManager.phase_animation_done.emit()
 
 func _place_all_tokens() -> void:
