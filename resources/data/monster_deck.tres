@@ -5,84 +5,244 @@
 
 [sub_resource type="Resource" id="Card0"]
 script = ExtResource("2")
-items_to_draw = 1
-card_name = "Lurking in Shadows"
-move_steps = 2
-attack_dice = 1
-monster_names = ["Dracula"]
+items_to_draw = 2
+card_name = "Hypnotic Gaze"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Mummy", "Invisible Man", "Creature"]
 
 [sub_resource type="Resource" id="Card1"]
 script = ExtResource("2")
-items_to_draw = 2
-card_name = "Frenzied Hunt"
+items_to_draw = 3
+card_name = "The Innocent"
 move_steps = 1
-attack_dice = 2
-monster_names = ["Dracula"]
+attack_dice = 3
+monster_names = ["Frankenstein", "Bride", "Frenzy"]
 
 [sub_resource type="Resource" id="Card2"]
 script = ExtResource("2")
-items_to_draw = 0
-card_name = "Swift Pursuit"
-move_steps = 3
+items_to_draw = 3
+card_name = "Former Employer"
+move_steps = 1
 attack_dice = 2
-monster_names = ["Dracula"]
+monster_names = ["Invisible Man", "Frenzy"]
 
 [sub_resource type="Resource" id="Card3"]
 script = ExtResource("2")
-items_to_draw = 1
-card_name = "Night Stalker"
-move_steps = 2
-attack_dice = 2
-monster_names = ["Dracula"]
+items_to_draw = 0
+card_name = "Retreat (Lagoon)"
+move_steps = 1
+attack_dice = 3
+monster_names = ["Wolfman", "Bride", "Frenzy"]
 
 [sub_resource type="Resource" id="Card4"]
 script = ExtResource("2")
-items_to_draw = 3
-card_name = "Gathering Darkness"
+items_to_draw = 0
+card_name = "Retreat (Waterfront)"
 move_steps = 1
-attack_dice = 1
-monster_names = ["Dracula"]
+attack_dice = 3
+monster_names = ["Wolfman", "Bride", "Frenzy"]
 
 [sub_resource type="Resource" id="Card5"]
 script = ExtResource("2")
-items_to_draw = 2
-card_name = "Savage Attack"
-move_steps = 2
+items_to_draw = 3
+card_name = "The Delivery"
+move_steps = 1
 attack_dice = 3
-monster_names = ["Dracula"]
+monster_names = ["Frankenstein", "Bride", "Frenzy"]
 
 [sub_resource type="Resource" id="Card6"]
 script = ExtResource("2")
-items_to_draw = 0
-card_name = "Stealthy Approach"
-move_steps = 2
-attack_dice = 1
-monster_names = ["Dracula"]
+items_to_draw = 3
+card_name = "On the Move"
+move_steps = 3
+attack_dice = 2
+monster_names = ["Frenzy"]
 
 [sub_resource type="Resource" id="Card7"]
 script = ExtResource("2")
-items_to_draw = 1
-card_name = "Relentless Chase"
-move_steps = 3
+items_to_draw = 3
+card_name = "Hurried Assistant"
+move_steps = 1
 attack_dice = 2
-monster_names = ["Dracula"]
+monster_names = ["Frankenstein", "Bride", "Frenzy"]
 
 [sub_resource type="Resource" id="Card8"]
 script = ExtResource("2")
 items_to_draw = 2
-card_name = "Thunderous Strike"
+card_name = "Thief"
 move_steps = 1
 attack_dice = 3
-monster_names = ["Dracula"]
+monster_names = ["Mummy", "Creature", "Frankenstein"]
 
 [sub_resource type="Resource" id="Card9"]
 script = ExtResource("2")
-items_to_draw = 1
-card_name = "Midnight Rampage"
+items_to_draw = 2
+card_name = "The Hunt Is On"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Creature", "Dracula", "Frenzy"]
+
+[sub_resource type="Resource" id="Card10"]
+script = ExtResource("2")
+items_to_draw = 0
+card_name = "Reincarnated Soul"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Wolfman", "Dracula", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card11"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "Thief"
+move_steps = 1
+attack_dice = 3
+monster_names = ["Mummy", "Creature", "Frankenstein"]
+
+[sub_resource type="Resource" id="Card12"]
+script = ExtResource("2")
+items_to_draw = 0
+card_name = "Reincarnated Soul"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Wolfman", "Dracula", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card13"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "The Hunt Is On"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Creature", "Dracula", "Frenzy"]
+
+[sub_resource type="Resource" id="Card14"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "The Meeting"
+move_steps = 2
+attack_dice = 1
+monster_names = ["Creature", "Wolfman", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card15"]
+script = ExtResource("2")
+items_to_draw = 0
+card_name = "Reincarnated Soul"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Wolfman", "Dracula", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card16"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "The Ichthyologist"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Creature", "Frenzy"]
+
+[sub_resource type="Resource" id="Card17"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "The Hunt Is On"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Creature", "Dracula", "Frenzy"]
+
+[sub_resource type="Resource" id="Card18"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "Form of the Bat"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Mummy", "Bride", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card19"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "The Meeting"
+move_steps = 2
+attack_dice = 1
+monster_names = ["Creature", "Wolfman", "Invisible Man"]
+
+[sub_resource type="Resource" id="Card20"]
+script = ExtResource("2")
+items_to_draw = 0
+card_name = "Sunrise"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Invisible Man", "Frankenstein", "Frenzy"]
+
+[sub_resource type="Resource" id="Card21"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "On the Move"
+move_steps = 3
+attack_dice = 2
+monster_names = ["Frenzy"]
+
+[sub_resource type="Resource" id="Card22"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "Thief"
+move_steps = 1
+attack_dice = 3
+monster_names = ["Mummy", "Creature", "Frankenstein"]
+
+[sub_resource type="Resource" id="Card23"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "Egyptian Expert"
 move_steps = 2
 attack_dice = 2
-monster_names = ["Dracula"]
+monster_names = ["Mummy", "Frenzy"]
+
+[sub_resource type="Resource" id="Card24"]
+script = ExtResource("2")
+items_to_draw = 0
+card_name = "Retreat (River)"
+move_steps = 1
+attack_dice = 3
+monster_names = ["Wolfman", "Bride", "Frenzy"]
+
+[sub_resource type="Resource" id="Card25"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "Fortune Teller"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Wolfman", "Frenzy"]
+
+[sub_resource type="Resource" id="Card26"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "Insane Survivor"
+move_steps = 2
+attack_dice = 2
+monster_names = ["Dracula", "Frenzy"]
+
+[sub_resource type="Resource" id="Card27"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "The Enthralled"
+move_steps = 2
+attack_dice = 1
+monster_names = ["Dracula", "Frenzy"]
+
+[sub_resource type="Resource" id="Card28"]
+script = ExtResource("2")
+items_to_draw = 3
+card_name = "Worried Fiancee"
+move_steps = 1
+attack_dice = 2
+monster_names = ["Frankenstein", "Bride", "Frenzy"]
+
+[sub_resource type="Resource" id="Card29"]
+script = ExtResource("2")
+items_to_draw = 2
+card_name = "The Meeting"
+move_steps = 2
+attack_dice = 1
+monster_names = ["Creature", "Wolfman", "Invisible Man"]
 
 [resource]
 script = ExtResource("1")
-cards = [SubResource("Card0"), SubResource("Card1"), SubResource("Card2"), SubResource("Card3"), SubResource("Card4"), SubResource("Card5"), SubResource("Card6"), SubResource("Card7"), SubResource("Card8"), SubResource("Card9")]
+cards = [SubResource("Card0"), SubResource("Card1"), SubResource("Card2"), SubResource("Card3"), SubResource("Card4"), SubResource("Card5"), SubResource("Card6"), SubResource("Card7"), SubResource("Card8"), SubResource("Card9"), SubResource("Card10"), SubResource("Card11"), SubResource("Card12"), SubResource("Card13"), SubResource("Card14"), SubResource("Card15"), SubResource("Card16"), SubResource("Card17"), SubResource("Card18"), SubResource("Card19"), SubResource("Card20"), SubResource("Card21"), SubResource("Card22"), SubResource("Card23"), SubResource("Card24"), SubResource("Card25"), SubResource("Card26"), SubResource("Card27"), SubResource("Card28"), SubResource("Card29")]
