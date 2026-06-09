@@ -1,11 +1,16 @@
 class_name MonsterToken
 extends Node2D
 
-const RADIUS := 14.0
+const HALF := 13.0
 const FILL_COLOR := Color(0.15, 0.10, 0.10)
 const BORDER_COLOR := Color(0.80, 0.10, 0.10)
+const LABEL_COLOR := Color.WHITE
+const FONT_SIZE := 13
 
-func setup(_data: MonsterData) -> void:
+var _label: String = ""
+
+func setup(data: MonsterData) -> void:
+	_label = data.monster_name.left(1)
 	queue_redraw()
 
 func move_to(world_pos: Vector2) -> Tween:
@@ -15,5 +20,14 @@ func move_to(world_pos: Vector2) -> Tween:
 	return tween
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, RADIUS, FILL_COLOR)
-	draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 32, BORDER_COLOR, 2.0)
+	var rect := Rect2(-HALF, -HALF, HALF * 2, HALF * 2)
+	draw_rect(rect, FILL_COLOR)
+	draw_rect(rect, BORDER_COLOR, false, 2.0)
+	if _label.is_empty():
+		return
+	var font := ThemeDB.fallback_font
+	var w := font.get_string_size(_label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x
+	var ascent := font.get_ascent(FONT_SIZE)
+	var descent := font.get_descent(FONT_SIZE)
+	draw_string(font, Vector2(-w * 0.5, (ascent - descent) * 0.5),
+			_label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, LABEL_COLOR)
