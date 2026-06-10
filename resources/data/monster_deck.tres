@@ -154,6 +154,7 @@ card_name = "Form of the Bat"
 move_steps = 1
 attack_dice = 2
 monster_names = ["Mummy", "Bride", "Invisible Man"]
+description = "Place Dracula in the space with the current player's Hero"
 
 [sub_resource type="Resource" id="Card19"]
 script = ExtResource("2")
@@ -170,6 +171,7 @@ card_name = "Sunrise"
 move_steps = 1
 attack_dice = 2
 monster_names = ["Invisible Man", "Frankenstein", "Frenzy"]
+description = "Place Dracula at the Crypt"
 
 [sub_resource type="Resource" id="Card21"]
 script = ExtResource("2")

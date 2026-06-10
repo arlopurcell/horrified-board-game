@@ -1,0 +1,108 @@
+[gd_resource type="Resource" script_class="PerkDeckData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_deck_data.gd" id="1"]
+[ext_resource type="Script" path="res://resources/perk_card_data.gd" id="2"]
+
+[sub_resource type="Resource" id="Perk0"]
+script = ExtResource("2")
+title = "Show of Force"
+description = "Place the Creature in any space or move any Monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk1"]
+script = ExtResource("2")
+title = "Overstock"
+description = "Each player draws and places 1 item from the bag"
+
+[sub_resource type="Resource" id="Perk2"]
+script = ExtResource("2")
+title = "Repel"
+description = "Move each Monster up to 2 spaces"
+
+[sub_resource type="Resource" id="Perk3"]
+script = ExtResource("2")
+title = "Late into the Night"
+description = "The current player takes 2 additional actions"
+
+[sub_resource type="Resource" id="Perk4"]
+script = ExtResource("2")
+title = "Special Delivery"
+description = "A hero may give any number of items to one other Hero, no matter where they are"
+
+[sub_resource type="Resource" id="Perk5"]
+script = ExtResource("2")
+title = "Hunter Becomes Prey"
+description = "Place the Wolfman in any space or move any Monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk6"]
+script = ExtResource("2")
+title = "Overstock"
+description = "Each player draws and places 1 Item from the Item bag"
+
+[sub_resource type="Resource" id="Perk7"]
+script = ExtResource("2")
+title = "Brandish Crucifix"
+description = "Place Dracula in any space or move any Monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk8"]
+script = ExtResource("2")
+title = "Late into the Night"
+description = "The current player takes 2 additional actions"
+
+[sub_resource type="Resource" id="Perk9"]
+script = ExtResource("2")
+title = "Rush"
+description = "Move a hero up to 4 spaces"
+
+[sub_resource type="Resource" id="Perk10"]
+script = ExtResource("2")
+title = "Break of Dawn"
+description = "Skip the next monster phase. Draw and place 2 items from the item bag"
+
+[sub_resource type="Resource" id="Perk11"]
+script = ExtResource("2")
+title = "Break of Dawn"
+description = "Skip the next monster phase. Draw and place 2 items from the item bag"
+
+[sub_resource type="Resource" id="Perk12"]
+script = ExtResource("2")
+title = "Taxi Ride"
+description = "Place a Hero in any non-water space"
+
+[sub_resource type="Resource" id="Perk13"]
+script = ExtResource("2")
+title = "Conduct an Investigation"
+description = "Choose a space with a Hero. You may place any number of Heroes in that space."
+
+[sub_resource type="Resource" id="Perk14"]
+script = ExtResource("2")
+title = "Power of the Ancients"
+description = "Place the Mummy in any space or move any Monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk15"]
+script = ExtResource("2")
+title = "Mob Justice"
+description = "Place either Frankenstein or the Bride in any space or move any Monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk16"]
+script = ExtResource("2")
+title = "Taxi Ride"
+description = "Place a Hero in any non-water space"
+
+[sub_resource type="Resource" id="Perk17"]
+script = ExtResource("2")
+title = "Hurry"
+description = "Move each Hero up to 2 spaces"
+
+[sub_resource type="Resource" id="Perk18"]
+script = ExtResource("2")
+title = "Visit from the Detective"
+description = "Place the Invisible Man in any space or move any monster 3 spaces"
+
+[sub_resource type="Resource" id="Perk19"]
+script = ExtResource("2")
+title = "Rush"
+description = "Move a Hero up to 4 spaces"
+
+[resource]
+script = ExtResource("1")
+cards = [SubResource("Perk0"), SubResource("Perk1"), SubResource("Perk2"), SubResource("Perk3"), SubResource("Perk4"), SubResource("Perk5"), SubResource("Perk6"), SubResource("Perk7"), SubResource("Perk8"), SubResource("Perk9"), SubResource("Perk10"), SubResource("Perk11"), SubResource("Perk12"), SubResource("Perk13"), SubResource("Perk14"), SubResource("Perk15"), SubResource("Perk16"), SubResource("Perk17"), SubResource("Perk18"), SubResource("Perk19")]

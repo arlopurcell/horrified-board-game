@@ -7,10 +7,12 @@ signal dice_rolled(results: Array)
 signal dice_animation_done
 signal card_drawn(card: MonsterCardData, item_info: Array)
 signal card_display_done
+signal monster_relocated
 
 var monsters: Array[MonsterData] = []
 var draw_pile: Array[MonsterCardData] = []
 var discard_pile: Array[MonsterCardData] = []
+var skip_next_phase: bool = false
 
 
 func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void:
@@ -31,6 +33,12 @@ func remove_monster(monster_name: String) -> void:
 
 
 func run_phase() -> void:
+	if skip_next_phase:
+		skip_next_phase = false
+		monsters_moved.emit([])
+		await phase_animation_done
+		phase_completed.emit("Monster phase skipped")
+		return
 	if monsters.is_empty():
 		monsters_moved.emit([])
 		return
@@ -48,8 +56,9 @@ func run_phase() -> void:
 	card_drawn.emit(card, item_info)
 	await card_display_done
 	GameManager.draw_items_to_board(card.items_to_draw)
-	await get_tree().create_timer(1.0).timeout
 	var summary_parts: Array[String] = []
+	_run_card_logic(card, summary_parts)
+	await get_tree().create_timer(1.0).timeout
 	var move_data: Array = []
 	var attack_dice: Array = []
 	for monster_name: String in card.monster_names:
@@ -107,6 +116,54 @@ func run_phase() -> void:
 		dice_rolled.emit(attack_dice)
 		await dice_animation_done
 	phase_completed.emit(" | ".join(summary_parts))
+
+
+func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
+	match card.card_name:
+		"Sunrise":
+			_logic_sunrise(summary)
+		"Form of the Bat":
+			_logic_form_of_the_bat(summary)
+
+
+func _logic_sunrise(summary: Array[String]) -> void:
+	var dracula: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Dracula":
+			dracula = m
+			break
+	if dracula == null:
+		return
+	if GameManager.board_data == null:
+		return
+	var crypt_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Crypt":
+			crypt_id = space.id
+			break
+	if crypt_id == -1:
+		return
+	dracula.current_space_id = crypt_id
+	monster_relocated.emit()
+	summary.append("Dracula retreated to the Crypt")
+
+
+func _logic_form_of_the_bat(summary: Array[String]) -> void:
+	var dracula: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Dracula":
+			dracula = m
+			break
+	if dracula == null:
+		return
+	if GameManager.players.is_empty():
+		return
+	var player := GameManager.players[GameManager.active_player_index]
+	dracula.current_space_id = player.current_space_id
+	monster_relocated.emit()
+	var space := GameManager.board_data.get_space(player.current_space_id) if GameManager.board_data != null else null
+	var space_name := space.name if space != null else str(player.current_space_id)
+	summary.append("Dracula moved to " + space_name + " (" + player.display_name + "'s location)")
 
 
 func _nearest_player_space(from_id: int) -> int:

@@ -15,6 +15,7 @@ func setup(monster_list: Array[MonsterData], board: Board, camera: Camera2D = nu
 		token.setup(monster)
 		_tokens.append(token)
 	MonsterManager.monsters_moved.connect(_on_monsters_moved)
+	MonsterManager.monster_relocated.connect(_place_all_tokens)
 	GameManager.monster_defeated.connect(_on_monster_defeated)
 	_place_all_tokens()
 

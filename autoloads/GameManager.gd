@@ -35,9 +35,11 @@ var board_items: Dictionary = {}    # space_id (int) -> Array[ItemData]
 var phase_running: bool = false
 var dracula_coffins: Dictionary = {}   # space_id (int) -> smashed (bool)
 var game_over: bool = false
+var perk_cards: Array[PerkCardData] = []
 
 signal monster_defeated(monster_name: String)
 signal game_won
+signal perk_cards_changed
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -65,6 +67,7 @@ func start_game(player_count: int) -> void:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
 			dracula_coffins[space.id] = false
 	_place_initial_items()
+	_deal_perk_cards(player_count)
 	turn_changed.emit(0)
 
 func _load_all_characters() -> Array[CharacterData]:
@@ -100,6 +103,54 @@ func _place_initial_items() -> void:
 		placed += 1
 	bag = bag.slice(placed)
 	items_changed.emit()
+
+func _deal_perk_cards(player_count: int) -> void:
+	var deck := load("res://resources/data/perk_deck.tres") as PerkDeckData
+	if deck == null:
+		return
+	var shuffled := deck.cards.duplicate()
+	shuffled.shuffle()
+	perk_cards.clear()
+	for i in range(mini(player_count, shuffled.size())):
+		perk_cards.append(shuffled[i] as PerkCardData)
+	perk_cards_changed.emit()
+
+func play_perk_card(card: PerkCardData) -> void:
+	if phase_running:
+		return
+	var idx := perk_cards.find(card)
+	if idx == -1:
+		return
+	perk_cards.remove_at(idx)
+	perk_cards_changed.emit()
+
+func teleport_player(player_index: int, space_id: int) -> void:
+	if player_index < 0 or player_index >= players.size():
+		return
+	players[player_index].current_space_id = space_id
+	player_moved.emit(player_index, space_id)
+
+func get_spaces_reachable(from_id: int, max_steps: int) -> Array[int]:
+	if board_data == null:
+		return []
+	var visited: Dictionary = {from_id: true}
+	var frontier: Array[int] = [from_id]
+	for _step in range(max_steps):
+		var next_frontier: Array[int] = []
+		for sid: int in frontier:
+			var space := board_data.get_space(sid)
+			if space == null:
+				continue
+			for n: int in space.neighbors:
+				if not visited.has(n):
+					visited[n] = true
+					next_frontier.append(n)
+		frontier = next_frontier
+	var result: Array[int] = []
+	for k in visited:
+		if k != from_id:
+			result.append(k as int)
+	return result
 
 func try_move(space_id: int) -> bool:
 	if game_over or phase_running or moves_remaining <= 0 or players.is_empty() or board_data == null:
