@@ -14,6 +14,9 @@ func _ready() -> void:
 	$UI.setup(GameManager.players)
 	$Players.setup(GameManager.players, $Board)
 	$Monsters.setup(MonsterManager.monsters, $Board, $Board/Camera2D)
+	var terror_meter := load("res://scenes/TerrorMeter.gd").new() as Node2D
+	terror_meter.position = Vector2(250.0, 70.0)
+	$Board.add_child(terror_meter)
 	GameManager.turn_changed.connect(_on_turn_changed)
 	_center_camera_on_player(GameManager.active_player_index)
 

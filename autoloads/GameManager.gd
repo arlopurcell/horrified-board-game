@@ -36,10 +36,16 @@ var phase_running: bool = false
 var dracula_coffins: Dictionary = {}   # space_id (int) -> smashed (bool)
 var game_over: bool = false
 var perk_cards: Array[PerkCardData] = []
+var terror_level: int = 0
+var dead_players: Dictionary = {}   # player_index (int) -> true
+
+const TERROR_MAX := 7
 
 signal monster_defeated(monster_name: String)
 signal game_won
+signal game_lost
 signal perk_cards_changed
+signal terror_changed(level: int)
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -62,6 +68,8 @@ func start_game(player_count: int) -> void:
 	moves_remaining = players[0].character.actions_per_turn if players[0].character != null else MOVES_PER_TURN
 	board_items.clear()
 	game_over = false
+	terror_level = 0
+	dead_players.clear()
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -170,10 +178,27 @@ func end_turn() -> void:
 	phase_running = true
 	await MonsterManager.run_phase()
 	phase_running = false
+	if game_over:
+		return
 	active_player_index = (active_player_index + 1) % players.size()
-	var next_char := players[active_player_index].character
+	var next_player := players[active_player_index]
+	if dead_players.has(active_player_index):
+		dead_players.erase(active_player_index)
+		next_player.current_space_id = _find_space_by_name("Hospital")
+	var next_char := next_player.character
 	moves_remaining = next_char.actions_per_turn if next_char != null else MOVES_PER_TURN
 	turn_changed.emit(active_player_index)
+
+func apply_player_death(player_index: int) -> void:
+	if player_index < 0 or player_index >= players.size():
+		return
+	players[player_index].current_space_id = -1
+	dead_players[player_index] = true
+	terror_level += 1
+	terror_changed.emit(terror_level)
+	if terror_level >= TERROR_MAX:
+		game_over = true
+		game_lost.emit()
 
 func can_pickup() -> bool:
 	if moves_remaining <= 0 or players.is_empty():

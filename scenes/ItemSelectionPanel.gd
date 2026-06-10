@@ -9,6 +9,7 @@ const REQUIRED_STRENGTH := 6
 var _items: Array[ItemData] = []
 var _checkboxes: Array[CheckBox] = []
 var _strength_boost: int = 0
+var _required_strength: int = REQUIRED_STRENGTH
 var _total_label: Label
 var _confirm_btn: Button
 var _item_list: VBoxContainer
@@ -62,9 +63,10 @@ func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirmed)
 	btn_row.add_child(_confirm_btn)
 
-func open(items: Array[ItemData], strength_boost: int = 0) -> void:
+func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH) -> void:
 	_items = items
 	_strength_boost = strength_boost
+	_required_strength = required_strength
 	_checkboxes.clear()
 	for child in _item_list.get_children():
 		child.queue_free()
@@ -83,11 +85,17 @@ func _on_toggled(_pressed: bool) -> void:
 
 func _update_total() -> void:
 	var total := 0
+	var count := 0
 	for i in range(_checkboxes.size()):
 		if _checkboxes[i].button_pressed:
 			total += _items[i].strength + _strength_boost
-	_total_label.text = "Total strength: %d / %d required" % [total, REQUIRED_STRENGTH]
-	_confirm_btn.disabled = total < REQUIRED_STRENGTH
+			count += 1
+	if _required_strength <= 0:
+		_total_label.text = "Select any item to block the hit"
+		_confirm_btn.disabled = count == 0
+	else:
+		_total_label.text = "Total strength: %d / %d required" % [total, _required_strength]
+		_confirm_btn.disabled = total < _required_strength
 
 func _on_confirmed() -> void:
 	var selected: Array[ItemData] = []

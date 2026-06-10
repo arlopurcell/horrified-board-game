@@ -7,6 +7,7 @@ const CONNECTION_COLOR := Color(0.353, 0.235, 0.1, 0.5)
 const CONNECTION_WIDTH := 4.0
 const BORDER_COLOR := Color(0.353, 0.235, 0.1, 1.0)
 const BORDER_PAD := 20.0
+const BORDER_TOP_EXTRA := 65.0
 
 var _space_nodes: Dictionary = {}   # space_id (int) -> SpaceNode
 var _board_data: BoardData = null
@@ -42,8 +43,9 @@ func _draw_board_border() -> void:
 		min_y = minf(min_y, sn.position.y)
 		max_x = maxf(max_x, sn.position.x + SpaceNode.SIZE.x)
 		max_y = maxf(max_y, sn.position.y + SpaceNode.SIZE.y)
-	draw_rect(Rect2(min_x - BORDER_PAD, min_y - BORDER_PAD,
-			max_x - min_x + BORDER_PAD * 2, max_y - min_y + BORDER_PAD * 2),
+	var top := min_y - BORDER_PAD - BORDER_TOP_EXTRA
+	draw_rect(Rect2(min_x - BORDER_PAD, top,
+			max_x - min_x + BORDER_PAD * 2, max_y - top + BORDER_PAD),
 			BORDER_COLOR, false, 4.0)
 
 func get_space_center(space_id: int) -> Vector2:

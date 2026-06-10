@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var defeat_button: Button = $DefeatButton
 @onready var special_button: Button = $SpecialButton
 @onready var game_won_label: Label = $GameWonLabel
+@onready var game_lost_label: Label = $GameLostLabel
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -24,6 +25,9 @@ var _professor_target_player: int = -1
 var _pending_perk_card: PerkCardData = null
 var _perk_step: String = ""
 var _perk_data: Dictionary = {}
+var _hit_space_id: int = -1
+var _hit_remaining: int = 0
+var _hit_target_player: int = -1
 
 func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -36,6 +40,8 @@ func _ready() -> void:
 	GameManager.items_changed.connect(_on_items_changed)
 	GameManager.monster_defeated.connect(_on_monster_defeated)
 	GameManager.game_won.connect(_on_game_won)
+	GameManager.game_lost.connect(_on_game_lost)
+	MonsterManager.space_attacked.connect(_on_space_attacked)
 	MonsterManager.phase_completed.connect(_on_phase_completed)
 	_item_panel = ItemSelectionPanelScene.new()
 	add_child(_item_panel)
@@ -109,6 +115,23 @@ func _on_special_selected(choice_idx: int) -> void:
 	if _perk_step != "":
 		_on_perk_step_selected(choice_idx)
 		return
+	if _pending_action == "hit_who":
+		_hit_target_player = _special_targets[choice_idx] as int
+		_special_targets = []
+		_pending_action = ""
+		_show_hit_block_choice()
+		return
+	if _pending_action == "hit_choice":
+		if choice_idx == 0:
+			var player := GameManager.players[_hit_target_player]
+			var items: Array[ItemData] = []
+			for item in player.inventory:
+				items.append(item as ItemData)
+			_pending_action = "hit_item"
+			_item_panel.open(items, 0, 0)
+		else:
+			_apply_hit_death()
+		return
 	match _pending_action:
 		"archaeologist":
 			GameManager.try_archaeologist(_special_targets[choice_idx] as int)
@@ -130,6 +153,15 @@ func _on_special_cancelled() -> void:
 		_perk_step = ""
 		_perk_data = {}
 		return
+	if _pending_action == "hit_who":
+		_hit_target_player = _special_targets[0] as int
+		_special_targets = []
+		_pending_action = ""
+		_show_hit_block_choice()
+		return
+	if _pending_action == "hit_choice":
+		_apply_hit_death()
+		return
 	_pending_action = ""
 	_special_targets = []
 
@@ -147,6 +179,16 @@ func _player_indices_to_labels(indices: Array) -> Array:
 	return result
 
 func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
+	if _pending_action == "hit_item":
+		var player := GameManager.players[_hit_target_player]
+		for item in selected_items:
+			player.inventory.erase(item)
+		GameManager.items_changed.emit()
+		_hit_remaining -= 1
+		_hit_target_player = -1
+		_pending_action = ""
+		_process_next_space_hit()
+		return
 	if _pending_action == "advance":
 		GameManager.try_advance(selected_items)
 	elif _pending_action == "defeat":
@@ -169,6 +211,9 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 	_refresh_action_buttons()
 
 func _on_item_panel_cancelled() -> void:
+	if _pending_action == "hit_item":
+		_apply_hit_death()
+		return
 	if _pending_action == "perk_delivery":
 		_pending_perk_card = null
 		_perk_step = ""
@@ -197,6 +242,58 @@ func _on_monster_defeated(_monster_name: String) -> void:
 
 func _on_game_won() -> void:
 	game_won_label.visible = true
+
+func _on_game_lost() -> void:
+	game_lost_label.visible = true
+
+func _on_space_attacked(space_id: int, num_hits: int) -> void:
+	_hit_space_id = space_id
+	_hit_remaining = num_hits
+	_process_next_space_hit()
+
+func _process_next_space_hit() -> void:
+	if _hit_remaining <= 0:
+		_hit_space_id = -1
+		call_deferred("_emit_hit_resolved")
+		return
+	var players_here: Array[int] = []
+	for i in range(GameManager.players.size()):
+		var p := GameManager.players[i]
+		if p.current_space_id == _hit_space_id and not GameManager.dead_players.has(i):
+			players_here.append(i)
+	if players_here.is_empty():
+		_hit_space_id = -1
+		call_deferred("_emit_hit_resolved")
+		return
+	if players_here.size() == 1:
+		_hit_target_player = players_here[0]
+		_show_hit_block_choice()
+	else:
+		var labels: Array[String] = []
+		for pi in players_here:
+			labels.append(GameManager.players[pi].display_name)
+		_special_targets = players_here
+		_pending_action = "hit_who"
+		_special_panel.open("Who takes the hit?", labels)
+
+func _show_hit_block_choice() -> void:
+	var player := GameManager.players[_hit_target_player]
+	if player.inventory.is_empty():
+		_apply_hit_death()
+		return
+	_pending_action = "hit_choice"
+	_special_panel.open(player.display_name + " was hit!", ["Block with an item", "Take the hit (die)"])
+
+func _apply_hit_death() -> void:
+	var player_index := _hit_target_player
+	_hit_target_player = -1
+	_hit_remaining -= 1
+	_pending_action = ""
+	GameManager.apply_player_death(player_index)
+	_process_next_space_hit()
+
+func _emit_hit_resolved() -> void:
+	MonsterManager.hit_resolved.emit()
 
 func _refresh_action_buttons() -> void:
 	_update_moves_indicator()

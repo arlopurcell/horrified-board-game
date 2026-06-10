@@ -8,6 +8,8 @@ signal dice_animation_done
 signal card_drawn(card: MonsterCardData, item_info: Array)
 signal card_display_done
 signal monster_relocated
+signal space_attacked(space_id: int, num_hits: int)
+signal hit_resolved
 
 var monsters: Array[MonsterData] = []
 var draw_pile: Array[MonsterCardData] = []
@@ -61,6 +63,7 @@ func run_phase() -> void:
 	await get_tree().create_timer(1.0).timeout
 	var move_data: Array = []
 	var attack_dice: Array = []
+	var hit_spaces: Dictionary = {}   # space_id -> int
 	for monster_name: String in card.monster_names:
 		var monster: MonsterData = null
 		for m in monsters:
@@ -110,11 +113,18 @@ func run_phase() -> void:
 				var power_note := _trigger_power(monster)
 				atk_text += " [POWER: " + power_note + "]"
 			summary_parts.append(atk_text)
+			if hits > 0:
+				hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + hits
 	monsters_moved.emit(move_data)
 	await phase_animation_done
 	if not attack_dice.is_empty():
 		dice_rolled.emit(attack_dice)
 		await dice_animation_done
+	for space_id in hit_spaces:
+		if GameManager.game_over:
+			break
+		space_attacked.emit(space_id as int, hit_spaces[space_id] as int)
+		await hit_resolved
 	phase_completed.emit(" | ".join(summary_parts))
 
 
