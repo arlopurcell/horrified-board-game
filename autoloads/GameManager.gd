@@ -152,6 +152,17 @@ func get_board_items(space_id: int) -> Array:
 		return (board_items[space_id] as Array).duplicate()
 	return []
 
+func peek_draw_items(count: int) -> Array:
+	var result: Array = []
+	var i := 0
+	while i < count and i < bag.size():
+		var item := bag[i] as ItemData
+		var space := board_data.get_space(item.location) if board_data != null else null
+		if space != null:
+			result.append({"world_pos": space.position + Vector2(50.0, 40.0), "color": item.color})
+		i += 1
+	return result
+
 func draw_items_to_board(count: int) -> void:
 	var drawn := 0
 	while drawn < count and not bag.is_empty():

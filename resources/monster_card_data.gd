@@ -6,3 +6,4 @@ extends Resource
 @export var move_steps: int = 1
 @export var attack_dice: int = 1
 @export var monster_names: Array[String] = []
+@export_multiline var description: String = ""

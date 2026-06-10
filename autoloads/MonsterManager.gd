@@ -5,6 +5,8 @@ signal phase_animation_done
 signal phase_completed(summary: String)
 signal dice_rolled(results: Array)
 signal dice_animation_done
+signal card_drawn(card: MonsterCardData, item_info: Array)
+signal card_display_done
 
 var monsters: Array[MonsterData] = []
 var draw_pile: Array[MonsterCardData] = []
@@ -42,7 +44,11 @@ func run_phase() -> void:
 		return
 	var card := draw_pile.pop_front() as MonsterCardData
 	discard_pile.append(card)
+	var item_info := GameManager.peek_draw_items(card.items_to_draw)
+	card_drawn.emit(card, item_info)
+	await card_display_done
 	GameManager.draw_items_to_board(card.items_to_draw)
+	await get_tree().create_timer(1.0).timeout
 	var summary_parts: Array[String] = []
 	var move_data: Array = []
 	var attack_dice: Array = []
