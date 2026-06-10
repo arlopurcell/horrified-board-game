@@ -53,7 +53,10 @@ func _place_all_tokens() -> void:
 		return
 	var positions := _compute_positions()
 	for i in range(_tokens.size()):
-		_tokens[i].position = positions[i]
+		var on_board := MonsterManager.monsters[i].current_space_id >= 0
+		_tokens[i].visible = on_board
+		if on_board:
+			_tokens[i].position = positions[i]
 
 func _compute_positions() -> Array[Vector2]:
 	var positions: Array[Vector2] = []

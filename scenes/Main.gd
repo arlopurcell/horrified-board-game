@@ -14,6 +14,13 @@ func _ready() -> void:
 	$UI.setup(GameManager.players)
 	$Players.setup(GameManager.players, $Board)
 	$Monsters.setup(MonsterManager.monsters, $Board, $Board/Camera2D)
+	var villager_list_data := load("res://resources/data/villagers.tres") as VillagerListData
+	var villager_list: Array[VillagerData] = []
+	if villager_list_data != null:
+		for v in villager_list_data.villagers:
+			villager_list.append((v as VillagerData).duplicate() as VillagerData)
+	VillagerManager.setup(villager_list)
+	$Villagers.setup(villager_list, $Board)
 	var terror_meter := load("res://scenes/TerrorMeter.gd").new() as Node2D
 	terror_meter.position = Vector2(250.0, 70.0)
 	$Board.add_child(terror_meter)

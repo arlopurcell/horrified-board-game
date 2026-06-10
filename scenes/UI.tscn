@@ -108,6 +108,15 @@ text = "DEFEAT MONSTER"
 theme_override_font_sizes/font_size = 13
 visible = false
 
+[node name="MoveVillagerButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 305.0
+offset_right = 250.0
+offset_bottom = 345.0
+text = "MOVE VILLAGER"
+theme_override_font_sizes/font_size = 13
+visible = false
+
 [node name="SpecialButton" type="Button" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0

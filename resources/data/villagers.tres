@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="VillagerListData" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://resources/villager_list_data.gd" id="1"]
+[ext_resource type="Script" path="res://resources/villager_data.gd" id="2"]
+
+[sub_resource type="Resource" id="V3"]
+script = ExtResource("2")
+villager_name = "Elizabeth"
+current_space_id = -1
+target_space_id = 9
+
+[sub_resource type="Resource" id="V4"]
+script = ExtResource("2")
+villager_name = "Lucy"
+current_space_id = -1
+target_space_id = 11
+
+[sub_resource type="Resource" id="V5"]
+script = ExtResource("2")
+villager_name = "Renfield"
+current_space_id = -1
+target_space_id = 19
+
+[sub_resource type="Resource" id="V6"]
+script = ExtResource("2")
+villager_name = "Maleva"
+current_space_id = -1
+target_space_id = 14
+
+[sub_resource type="Resource" id="V7"]
+script = ExtResource("2")
+villager_name = "Prof. Pearson"
+current_space_id = -1
+target_space_id = 16
+
+[sub_resource type="Resource" id="V8"]
+script = ExtResource("2")
+villager_name = "Dr. Reed"
+current_space_id = -1
+target_space_id = 1
+
+[sub_resource type="Resource" id="V9"]
+script = ExtResource("2")
+villager_name = "Fritz"
+current_space_id = -1
+target_space_id = 22
+
+[sub_resource type="Resource" id="V10"]
+script = ExtResource("2")
+villager_name = "Wilbur & Chick"
+current_space_id = -1
+target_space_id = 5
+
+[sub_resource type="Resource" id="V11"]
+script = ExtResource("2")
+villager_name = "Maria"
+current_space_id = -1
+target_space_id = 1
+
+[sub_resource type="Resource" id="V12"]
+script = ExtResource("2")
+villager_name = "Dr. Cranley"
+current_space_id = -1
+target_space_id = 2
+
+[resource]
+script = ExtResource("1")
+villagers = [SubResource("V3"), SubResource("V4"), SubResource("V5"), SubResource("V6"), SubResource("V7"), SubResource("V8"), SubResource("V9"), SubResource("V10"), SubResource("V11"), SubResource("V12")]

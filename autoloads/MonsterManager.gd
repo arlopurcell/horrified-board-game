@@ -73,7 +73,7 @@ func run_phase() -> void:
 		if monster == null:
 			push_warning("MonsterManager: card references unknown monster '%s'" % monster_name)
 			continue
-		var target_space := _nearest_player_space(monster.current_space_id)
+		var target_space := _nearest_target_space(monster.current_space_id)
 		if target_space == -1:
 			summary_parts.append(monster.monster_name + " didn't move")
 			continue
@@ -92,14 +92,19 @@ func run_phase() -> void:
 		monster.current_space_id = destination
 		var dest_space := GameManager.board_data.get_space(destination)
 		var dest_name := dest_space.name if dest_space != null else str(destination)
-		var players_here := false
+		var targets_here := false
 		for p in GameManager.players:
 			if p.current_space_id == destination:
-				players_here = true
+				targets_here = true
 				break
-		if not players_here:
+		if not targets_here:
+			for v in VillagerManager.villagers:
+				if (v as VillagerData).current_space_id == destination:
+					targets_here = true
+					break
+		if not targets_here:
 			summary_parts.append(monster.monster_name + " moved to " + dest_name)
-		else:
+		else:  # targets_here
 			var dice_results := _roll_dice(card.attack_dice)
 			attack_dice.append_array(dice_results)
 			var hits := dice_results.count("hit")
@@ -134,6 +139,26 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_sunrise(summary)
 		"Form of the Bat":
 			_logic_form_of_the_bat(summary)
+		"Worried Fiancee":
+			_logic_worried_fiancee(summary)
+		"The Enthralled":
+			_logic_the_enthralled(summary)
+		"Insane Survivor":
+			_logic_insane_survivor(summary)
+		"Fortune Teller":
+			_logic_fortune_teller(summary)
+		"Egyptian Expert":
+			_logic_egyptian_expert(summary)
+		"The Ichthyologist":
+			_logic_the_ichthyologist(summary)
+		"Hurried Assistant":
+			_logic_hurried_assistant(summary)
+		"The Delivery":
+			_logic_the_delivery(summary)
+		"The Innocent":
+			_logic_the_innocent(summary)
+		"Former Employer":
+			_logic_former_employer(summary)
 
 
 func _logic_sunrise(summary: Array[String]) -> void:
@@ -176,13 +201,219 @@ func _logic_form_of_the_bat(summary: Array[String]) -> void:
 	summary.append("Dracula moved to " + space_name + " (" + player.display_name + "'s location)")
 
 
-func _nearest_player_space(from_id: int) -> int:
-	if GameManager.players.is_empty() or GameManager.board_data == null:
+func _logic_worried_fiancee(summary: Array[String]) -> void:
+	var elizabeth: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Elizabeth":
+			elizabeth = v as VillagerData
+			break
+	if elizabeth == null:
+		return
+	var mansion_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Mansion":
+			mansion_id = space.id
+			break
+	if mansion_id == -1:
+		return
+	elizabeth.current_space_id = mansion_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Elizabeth appeared at the Mansion")
+
+
+func _logic_the_enthralled(summary: Array[String]) -> void:
+	var lucy: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Lucy":
+			lucy = v as VillagerData
+			break
+	if lucy == null:
+		return
+	var theatre_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Theatre":
+			theatre_id = space.id
+			break
+	if theatre_id == -1:
+		return
+	lucy.current_space_id = theatre_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Lucy appeared at the Theatre")
+
+
+func _logic_insane_survivor(summary: Array[String]) -> void:
+	var renfield: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Renfield":
+			renfield = v as VillagerData
+			break
+	if renfield == null:
+		return
+	var docks_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Docks":
+			docks_id = space.id
+			break
+	if docks_id == -1:
+		return
+	renfield.current_space_id = docks_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Renfield appeared at the Docks")
+
+
+func _logic_fortune_teller(summary: Array[String]) -> void:
+	var maleva: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Maleva":
+			maleva = v as VillagerData
+			break
+	if maleva == null:
+		return
+	var camp_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Camp":
+			camp_id = space.id
+			break
+	if camp_id == -1:
+		return
+	maleva.current_space_id = camp_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Maleva appeared at the Camp")
+
+
+func _logic_former_employer(summary: Array[String]) -> void:
+	var cranley: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Dr. Cranley":
+			cranley = v as VillagerData
+			break
+	if cranley == null:
+		return
+	var lab_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Laboratory":
+			lab_id = space.id
+			break
+	if lab_id == -1:
+		return
+	cranley.current_space_id = lab_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Dr. Cranley appeared at the Laboratory")
+
+
+func _logic_the_innocent(summary: Array[String]) -> void:
+	var maria: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Maria":
+			maria = v as VillagerData
+			break
+	if maria == null:
+		return
+	var barn_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Barn":
+			barn_id = space.id
+			break
+	if barn_id == -1:
+		return
+	maria.current_space_id = barn_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Maria appeared at the Barn")
+
+
+func _logic_the_delivery(summary: Array[String]) -> void:
+	var wilbur: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Wilbur & Chick":
+			wilbur = v as VillagerData
+			break
+	if wilbur == null:
+		return
+	var shop_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Shop":
+			shop_id = space.id
+			break
+	if shop_id == -1:
+		return
+	wilbur.current_space_id = shop_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Wilbur & Chick appeared at the Shop")
+
+
+func _logic_hurried_assistant(summary: Array[String]) -> void:
+	var fritz: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Fritz":
+			fritz = v as VillagerData
+			break
+	if fritz == null:
+		return
+	var tower_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Tower":
+			tower_id = space.id
+			break
+	if tower_id == -1:
+		return
+	fritz.current_space_id = tower_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Fritz appeared at the Tower")
+
+
+func _logic_the_ichthyologist(summary: Array[String]) -> void:
+	var reed: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Dr. Reed":
+			reed = v as VillagerData
+			break
+	if reed == null:
+		return
+	var institute_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Institute":
+			institute_id = space.id
+			break
+	if institute_id == -1:
+		return
+	reed.current_space_id = institute_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Dr. Reed appeared at the Institute")
+
+
+func _logic_egyptian_expert(summary: Array[String]) -> void:
+	var pearson: VillagerData = null
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).villager_name == "Prof. Pearson":
+			pearson = v as VillagerData
+			break
+	if pearson == null:
+		return
+	var cave_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == "Cave":
+			cave_id = space.id
+			break
+	if cave_id == -1:
+		return
+	pearson.current_space_id = cave_id
+	VillagerManager.villagers_changed.emit()
+	summary.append("Prof. Pearson appeared at the Cave")
+
+
+func _nearest_target_space(from_id: int) -> int:
+	if GameManager.board_data == null:
 		return -1
-	var player_spaces: Dictionary = {}
+	var target_spaces: Dictionary = {}
 	for p in GameManager.players:
-		player_spaces[p.current_space_id] = true
-	if player_spaces.has(from_id):
+		if p.current_space_id >= 0:
+			target_spaces[p.current_space_id] = true
+	for v in VillagerManager.villagers:
+		if (v as VillagerData).current_space_id >= 0:
+			target_spaces[(v as VillagerData).current_space_id] = true
+	if target_spaces.is_empty():
+		return -1
+	if target_spaces.has(from_id):
 		return from_id
 	var queue: Array[int] = [from_id]
 	var visited: Dictionary = {from_id: true}
@@ -192,7 +423,7 @@ func _nearest_player_space(from_id: int) -> int:
 		if space == null:
 			continue
 		for neighbor_id: int in space.neighbors:
-			if player_spaces.has(neighbor_id):
+			if target_spaces.has(neighbor_id):
 				return neighbor_id
 			if not visited.has(neighbor_id):
 				visited[neighbor_id] = true

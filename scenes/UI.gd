@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var special_button: Button = $SpecialButton
 @onready var game_won_label: Label = $GameWonLabel
 @onready var game_lost_label: Label = $GameLostLabel
+@onready var move_villager_button: Button = $MoveVillagerButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -28,6 +29,10 @@ var _perk_data: Dictionary = {}
 var _hit_space_id: int = -1
 var _hit_remaining: int = 0
 var _hit_target_player: int = -1
+var _hit_target_villager: VillagerData = null
+var _bring_along_queue: Array = []
+var _bring_along_destination: int = -1
+var _mv_villager: VillagerData = null
 
 func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -35,6 +40,8 @@ func _ready() -> void:
 	advance_button.pressed.connect(_on_advance_pressed)
 	defeat_button.pressed.connect(_on_defeat_pressed)
 	special_button.pressed.connect(_on_special_pressed)
+	move_villager_button.pressed.connect(_on_move_villager_pressed)
+	VillagerManager.villager_rescued.connect(_on_villager_rescued)
 	GameManager.turn_changed.connect(_on_turn_changed)
 	GameManager.player_moved.connect(_on_player_moved)
 	GameManager.items_changed.connect(_on_items_changed)
@@ -115,11 +122,53 @@ func _on_special_selected(choice_idx: int) -> void:
 	if _perk_step != "":
 		_on_perk_step_selected(choice_idx)
 		return
-	if _pending_action == "hit_who":
-		_hit_target_player = _special_targets[choice_idx] as int
+	if _pending_action == "bring_along":
+		if choice_idx == 0:
+			VillagerManager.move_villager(_bring_along_queue[0] as VillagerData, _bring_along_destination)
+		_bring_along_queue.pop_front()
+		_pending_action = ""
+		_process_bring_along_queue()
+		return
+	if _pending_action == "mv_who":
+		_mv_villager = _special_targets[choice_idx] as VillagerData
 		_special_targets = []
 		_pending_action = ""
-		_show_hit_block_choice()
+		var active_space := GameManager.players[GameManager.active_player_index].current_space_id
+		if _mv_villager.current_space_id == active_space:
+			var space := GameManager.board_data.get_space(active_space)
+			var adj: Array = []
+			var labels: Array[String] = []
+			if space != null:
+				for n: int in space.neighbors:
+					adj.append(n)
+					labels.append(_space_name_label(n))
+			_special_targets = adj
+			_pending_action = "mv_where"
+			_special_panel.open("Push " + _mv_villager.villager_name + " to:", labels)
+		else:
+			GameManager.try_move_villager(_mv_villager, active_space)
+			_mv_villager = null
+			_refresh_action_buttons()
+		return
+	if _pending_action == "mv_where":
+		GameManager.try_move_villager(_mv_villager, _special_targets[choice_idx] as int)
+		_mv_villager = null
+		_special_targets = []
+		_pending_action = ""
+		_refresh_action_buttons()
+		return
+	if _pending_action == "hit_who":
+		var target = _special_targets[choice_idx]
+		_special_targets = []
+		_pending_action = ""
+		if target is int:
+			_hit_target_player = target as int
+			_hit_target_villager = null
+			_show_hit_block_choice()
+		else:
+			_hit_target_villager = target as VillagerData
+			_hit_target_player = -1
+			_apply_villager_hit()
 		return
 	if _pending_action == "hit_choice":
 		if choice_idx == 0:
@@ -153,11 +202,28 @@ func _on_special_cancelled() -> void:
 		_perk_step = ""
 		_perk_data = {}
 		return
-	if _pending_action == "hit_who":
-		_hit_target_player = _special_targets[0] as int
+	if _pending_action == "bring_along":
+		_bring_along_queue.pop_front()
+		_pending_action = ""
+		_process_bring_along_queue()
+		return
+	if _pending_action == "mv_who" or _pending_action == "mv_where":
+		_mv_villager = null
 		_special_targets = []
 		_pending_action = ""
-		_show_hit_block_choice()
+		return
+	if _pending_action == "hit_who":
+		var target = _special_targets[0]
+		_special_targets = []
+		_pending_action = ""
+		if target is int:
+			_hit_target_player = target as int
+			_hit_target_villager = null
+			_show_hit_block_choice()
+		else:
+			_hit_target_villager = target as VillagerData
+			_hit_target_player = -1
+			_apply_villager_hit()
 		return
 	if _pending_action == "hit_choice":
 		_apply_hit_death()
@@ -224,10 +290,16 @@ func _on_turn_changed(_player_index: int) -> void:
 	end_turn_button.disabled = false
 	_refresh_turn_display()
 
-func _on_player_moved(_player_index: int, _space_id: int) -> void:
+func _on_player_moved(player_index: int, space_id: int) -> void:
 	_update_moves_indicator()
 	_refresh_pickup_button()
 	_refresh_action_buttons()
+	if player_index == GameManager.active_player_index and GameManager.last_move_from_space >= 0:
+		var from := GameManager.last_move_from_space
+		GameManager.last_move_from_space = -1
+		var here := VillagerManager.get_villagers_at(from)
+		if not here.is_empty():
+			_start_bring_along(here, space_id)
 
 func _on_items_changed() -> void:
 	_refresh_inventory()
@@ -261,18 +333,30 @@ func _process_next_space_hit() -> void:
 		var p := GameManager.players[i]
 		if p.current_space_id == _hit_space_id and not GameManager.dead_players.has(i):
 			players_here.append(i)
-	if players_here.is_empty():
+	var villagers_here: Array = VillagerManager.get_villagers_at(_hit_space_id)
+	if players_here.is_empty() and villagers_here.is_empty():
 		_hit_space_id = -1
 		call_deferred("_emit_hit_resolved")
 		return
-	if players_here.size() == 1:
-		_hit_target_player = players_here[0]
-		_show_hit_block_choice()
+	if players_here.size() + villagers_here.size() == 1:
+		if not players_here.is_empty():
+			_hit_target_player = players_here[0]
+			_hit_target_villager = null
+			_show_hit_block_choice()
+		else:
+			_hit_target_villager = villagers_here[0] as VillagerData
+			_hit_target_player = -1
+			_apply_villager_hit()
 	else:
+		var all_targets: Array = []
 		var labels: Array[String] = []
 		for pi in players_here:
-			labels.append(GameManager.players[pi].display_name)
-		_special_targets = players_here
+			all_targets.append(pi)
+			labels.append(GameManager.players[pi].display_name + " (hero)")
+		for v in villagers_here:
+			all_targets.append(v)
+			labels.append((v as VillagerData).villager_name + " (villager)")
+		_special_targets = all_targets
 		_pending_action = "hit_who"
 		_special_panel.open("Who takes the hit?", labels)
 
@@ -292,13 +376,60 @@ func _apply_hit_death() -> void:
 	GameManager.apply_player_death(player_index)
 	_process_next_space_hit()
 
+func _apply_villager_hit() -> void:
+	var v := _hit_target_villager
+	_hit_target_villager = null
+	_hit_remaining -= 1
+	VillagerManager.kill_villager(v)
+	_process_next_space_hit()
+
 func _emit_hit_resolved() -> void:
 	MonsterManager.hit_resolved.emit()
+
+func _on_villager_rescued(villager_name: String) -> void:
+	monster_log.text = villager_name + " escaped to safety! Drew a perk card."
+
+func _on_move_villager_pressed() -> void:
+	_start_move_villager()
+
+func _start_move_villager() -> void:
+	var active_space := GameManager.players[GameManager.active_player_index].current_space_id
+	var all_villagers: Array = []
+	var labels: Array[String] = []
+	for v in VillagerManager.get_villagers_at(active_space):
+		all_villagers.append(v)
+		labels.append((v as VillagerData).villager_name + " (push)")
+	var space := GameManager.board_data.get_space(active_space)
+	if space != null:
+		for n: int in space.neighbors:
+			for v in VillagerManager.get_villagers_at(n):
+				all_villagers.append(v)
+				labels.append((v as VillagerData).villager_name + " (pull here)")
+	if all_villagers.is_empty():
+		return
+	_special_targets = all_villagers
+	_pending_action = "mv_who"
+	_special_panel.open("Move which villager?", labels)
+
+func _start_bring_along(villagers: Array, to_space: int) -> void:
+	_bring_along_queue = villagers.duplicate()
+	_bring_along_destination = to_space
+	_process_bring_along_queue()
+
+func _process_bring_along_queue() -> void:
+	if _bring_along_queue.is_empty():
+		_bring_along_destination = -1
+		_refresh_action_buttons()
+		return
+	var v := _bring_along_queue[0] as VillagerData
+	_pending_action = "bring_along"
+	_special_panel.open("Bring " + v.villager_name + " along?", ["Yes", "No"])
 
 func _refresh_action_buttons() -> void:
 	_update_moves_indicator()
 	advance_button.visible = GameManager.can_advance()
 	defeat_button.visible = GameManager.can_defeat()
+	move_villager_button.visible = GameManager.can_move_villager()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
 		match active.character.special_id:

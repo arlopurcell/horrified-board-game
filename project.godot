@@ -24,6 +24,7 @@ config/main_scene="res://scenes/MainMenu.tscn"
 
 GameManager="*res://autoloads/GameManager.gd"
 MonsterManager="*res://autoloads/MonsterManager.gd"
+VillagerManager="*res://autoloads/VillagerManager.gd"
 
 [display]
 

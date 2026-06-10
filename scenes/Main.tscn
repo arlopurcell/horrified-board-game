@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scenes/Main.gd" id="1"]
 [ext_resource type="Script" path="res://scenes/Board.gd" id="2"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/UI.tscn" id="4"]
 [ext_resource type="Script" path="res://scenes/Monsters.gd" id="5"]
 [ext_resource type="Script" path="res://scenes/MonsterTaskDisplay.gd" id="6"]
+[ext_resource type="Script" path="res://scenes/Villagers.gd" id="7"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1")
@@ -22,6 +23,9 @@ script = ExtResource("6")
 
 [node name="Players" type="Node" parent="."]
 script = ExtResource("3")
+
+[node name="Villagers" type="Node" parent="."]
+script = ExtResource("7")
 
 [node name="Monsters" type="Node" parent="."]
 script = ExtResource("5")

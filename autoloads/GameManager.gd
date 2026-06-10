@@ -36,8 +36,10 @@ var phase_running: bool = false
 var dracula_coffins: Dictionary = {}   # space_id (int) -> smashed (bool)
 var game_over: bool = false
 var perk_cards: Array[PerkCardData] = []
+var _perk_deck_remaining: Array[PerkCardData] = []
 var terror_level: int = 0
 var dead_players: Dictionary = {}   # player_index (int) -> true
+var last_move_from_space: int = -1
 
 const TERROR_MAX := 7
 
@@ -119,8 +121,18 @@ func _deal_perk_cards(player_count: int) -> void:
 	var shuffled := deck.cards.duplicate()
 	shuffled.shuffle()
 	perk_cards.clear()
-	for i in range(mini(player_count, shuffled.size())):
-		perk_cards.append(shuffled[i] as PerkCardData)
+	_perk_deck_remaining.clear()
+	for i in range(shuffled.size()):
+		if i < player_count:
+			perk_cards.append(shuffled[i] as PerkCardData)
+		else:
+			_perk_deck_remaining.append(shuffled[i] as PerkCardData)
+	perk_cards_changed.emit()
+
+func add_perk_card_to_pool() -> void:
+	if _perk_deck_remaining.is_empty():
+		return
+	perk_cards.append(_perk_deck_remaining.pop_front() as PerkCardData)
 	perk_cards_changed.emit()
 
 func play_perk_card(card: PerkCardData) -> void:
@@ -167,9 +179,31 @@ func try_move(space_id: int) -> bool:
 	var legal := get_legal_moves()
 	if not legal.has(space_id):
 		return false
+	last_move_from_space = current_player.current_space_id
 	current_player.current_space_id = space_id
 	moves_remaining -= 1
 	player_moved.emit(active_player_index, space_id)
+	return true
+
+func can_move_villager() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty() or board_data == null:
+		return false
+	var space_id := players[active_player_index].current_space_id
+	if not VillagerManager.get_villagers_at(space_id).is_empty():
+		return true
+	var space := board_data.get_space(space_id)
+	if space == null:
+		return false
+	for n: int in space.neighbors:
+		if not VillagerManager.get_villagers_at(n).is_empty():
+			return true
+	return false
+
+func try_move_villager(villager: VillagerData, space_id: int) -> bool:
+	if game_over or phase_running or moves_remaining <= 0:
+		return false
+	moves_remaining -= 1
+	VillagerManager.move_villager(villager, space_id)
 	return true
 
 func end_turn() -> void:
