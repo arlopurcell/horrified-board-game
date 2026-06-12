@@ -3,6 +3,7 @@ extends Control
 const AVAILABLE_MONSTERS: Dictionary = {
     "Dracula": "res://resources/data/dracula.tres",
     "Wolfman": "res://resources/data/wolfman.tres",
+    "Mummy": "res://resources/data/mummy.tres",
 }
 
 var _selected_player_count := 0

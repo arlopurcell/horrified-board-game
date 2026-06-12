@@ -19,10 +19,21 @@ const CHECK_COL := Color(0.22, 0.80, 0.35)
 const BOX_BG := Color(0.18, 0.14, 0.12)
 const BOX_BORDER := Color(0.60, 0.60, 0.60)
 
+const MUMMY_RING_R := 30.0
+const MUMMY_TOKEN_R := 11.0
+const MUMMY_PAD_TOP := 6.0
+const MUMMY_EMPTY_COL := Color(0.12, 0.10, 0.08)
+const MUMMY_HIDDEN_COL := Color(0.25, 0.18, 0.10)
+const MUMMY_REVEALED_COL := Color(0.75, 0.58, 0.12)
+const MUMMY_CORRECT_COL := Color(0.18, 0.65, 0.25)
+const MUMMY_LINE_COL := Color(0.50, 0.50, 0.50, 0.45)
+const MUMMY_HINT_COL := Color(0.95, 0.90, 0.20)
+
 func _ready() -> void:
 	GameManager.items_changed.connect(queue_redraw)
 	GameManager.monster_defeated.connect(func(_n: String): queue_redraw())
 	GameManager.wolfman_cure_complete.connect(func(_i: int): queue_redraw())
+	GameManager.mummy_changed.connect(queue_redraw)
 	MonsterManager.frenzy_changed.connect(queue_redraw)
 
 func _draw() -> void:
@@ -36,6 +47,9 @@ func _draw() -> void:
 			px += PANEL_W + PANEL_GAP
 		elif m.monster_name == "Wolfman":
 			_draw_wolfman(font, px)
+			px += PANEL_W + PANEL_GAP
+		elif m.monster_name == "Mummy":
+			_draw_mummy(font, px)
 			px += PANEL_W + PANEL_GAP
 		else:
 			continue
@@ -107,6 +121,104 @@ func _draw_wolfman(font: Font, px: float) -> void:
 		draw_string(font, Vector2(cb_x + CB_SIZE + 6.0, ry + ROW_H * 0.5 + (la - ld) * 0.5),
 				"Blue item, " + label, HORIZONTAL_ALIGNMENT_LEFT, -1, FS_ROW, TEXT_COL)
 		ry += ROW_H
+
+
+func _mummy_slot_positions(px: float) -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	var cx := px + PANEL_W * 0.5
+	var cy := PANEL_Y + TITLE_H + H_PAD + MUMMY_PAD_TOP + MUMMY_RING_R + MUMMY_TOKEN_R
+	for i in range(6):
+		var angle := -PI * 0.5 + float(i) * PI / 3.0
+		positions.append(Vector2(cx + MUMMY_RING_R * cos(angle), cy + MUMMY_RING_R * sin(angle)))
+	positions.append(Vector2(cx, cy))
+	return positions
+
+
+func _mummy_panel_x() -> float:
+	var px := PANEL_X
+	for monster_ref in MonsterManager.monsters:
+		var m := monster_ref as MonsterData
+		if m.monster_name == "Mummy":
+			return px
+		if m.monster_name in ["Dracula", "Wolfman"]:
+			px += PANEL_W + PANEL_GAP
+	return -1.0
+
+
+func _draw_mummy(font: Font, px: float) -> void:
+	if GameManager.mummy_slot_contents.size() < 7:
+		return
+	var panel_h := TITLE_H + H_PAD + MUMMY_PAD_TOP + (MUMMY_RING_R + MUMMY_TOKEN_R) * 2.0 + H_PAD
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
+	var ta := font.get_ascent(FS_TITLE)
+	var td := font.get_descent(FS_TITLE)
+	draw_string(font, Vector2(px, PANEL_Y + TITLE_H * 0.5 + (ta - td) * 0.5),
+			"MUMMY", HORIZONTAL_ALIGNMENT_CENTER, PANEL_W, FS_TITLE, TEXT_COL)
+	var positions := _mummy_slot_positions(px)
+	# Connection lines
+	for i in range(6):
+		draw_line(positions[i], positions[(i + 1) % 6], MUMMY_LINE_COL, 1.5)
+		draw_line(positions[i], positions[6], MUMMY_LINE_COL, 1.5)
+	# Slot circles
+	var la := font.get_ascent(FS_ROW)
+	var ld := font.get_descent(FS_ROW)
+	var la_s := font.get_ascent(FS_ROW - 2)
+	var ld_s := font.get_descent(FS_ROW - 2)
+	for i in range(7):
+		var pos := positions[i]
+		var contents: int = GameManager.mummy_slot_contents[i]
+		var revealed: bool = GameManager.mummy_slot_revealed[i]
+		var can_flip := GameManager.can_flip_mummy_token(i)
+		var can_slide := GameManager.can_slide_mummy_token(i)
+		if contents == 0:
+			draw_circle(pos, MUMMY_TOKEN_R, MUMMY_EMPTY_COL)
+			draw_arc(pos, MUMMY_TOKEN_R, 0, TAU, 24, BOX_BORDER, 1.5)
+		elif not revealed:
+			draw_circle(pos, MUMMY_TOKEN_R, MUMMY_HIDDEN_COL)
+			var bcol := MUMMY_HINT_COL if can_flip else BOX_BORDER
+			draw_arc(pos, MUMMY_TOKEN_R, 0, TAU, 24, bcol, 2.5 if can_flip else 1.5)
+			draw_string(font, Vector2(pos.x - MUMMY_TOKEN_R, pos.y + (la - ld) * 0.5),
+					"?", HORIZONTAL_ALIGNMENT_CENTER, MUMMY_TOKEN_R * 2.0, FS_ROW, TEXT_COL)
+		else:
+			var correct := (i < 6 and contents == i + 1)
+			var fcol := MUMMY_CORRECT_COL if correct else MUMMY_REVEALED_COL
+			draw_circle(pos, MUMMY_TOKEN_R, fcol)
+			var bcol := MUMMY_HINT_COL if can_slide else BOX_BORDER
+			draw_arc(pos, MUMMY_TOKEN_R, 0, TAU, 24, bcol, 2.5 if can_slide else 1.5)
+			draw_string(font, Vector2(pos.x - MUMMY_TOKEN_R, pos.y + (la - ld) * 0.5),
+					str(contents), HORIZONTAL_ALIGNMENT_CENTER, MUMMY_TOKEN_R * 2.0, FS_ROW, TEXT_COL)
+		# Slot label (small, outside circle) for circle slots only
+		if i < 6:
+			var angle := -PI * 0.5 + float(i) * PI / 3.0
+			var label_dir := Vector2(cos(angle), sin(angle))
+			var label_pos := pos + label_dir * (MUMMY_TOKEN_R + 7.0)
+			draw_string(font, Vector2(label_pos.x - 6.0, label_pos.y + (la_s - ld_s) * 0.5),
+					str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, 12.0, FS_ROW - 2,
+					Color(0.70, 0.70, 0.70, 0.75))
+
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton):
+		return
+	var mb := event as InputEventMouseButton
+	if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if GameManager.phase_running or GameManager.game_over:
+		return
+	if GameManager.mummy_moves_remaining <= 0:
+		return
+	var mummy_px := _mummy_panel_x()
+	if mummy_px < 0:
+		return
+	var local_pos := get_local_mouse_position()
+	var positions := _mummy_slot_positions(mummy_px)
+	for i in range(positions.size()):
+		if local_pos.distance_to(positions[i]) <= MUMMY_TOKEN_R:
+			if GameManager.try_flip_mummy_token(i) or GameManager.try_slide_mummy_token(i):
+				get_viewport().set_input_as_handled()
+			return
 
 
 func _draw_frenzy_icon(px: float) -> void:

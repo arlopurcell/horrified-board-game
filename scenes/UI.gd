@@ -12,9 +12,12 @@ extends CanvasLayer
 @onready var special_button: Button = $SpecialButton
 @onready var game_won_label: Label = $GameWonLabel
 @onready var game_lost_label: Label = $GameLostLabel
+@onready var main_menu_button: Button = $MainMenuButton
 @onready var move_villager_button: Button = $MoveVillagerButton
 @onready var cure_button: Button = $CureButton
 @onready var defeat_wolfman_button: Button = $DefeatWolfmanButton
+@onready var advance_mummy_button: Button = $AdvanceMummyButton
+@onready var defeat_mummy_button: Button = $DefeatMummyButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -45,8 +48,12 @@ func _ready() -> void:
 	move_villager_button.pressed.connect(_on_move_villager_pressed)
 	cure_button.pressed.connect(_on_cure_pressed)
 	defeat_wolfman_button.pressed.connect(_on_defeat_wolfman_pressed)
+	advance_mummy_button.pressed.connect(_on_advance_mummy_pressed)
+	defeat_mummy_button.pressed.connect(_on_defeat_mummy_pressed)
 	GameManager.wolfman_cure_complete.connect(_on_wolfman_cure_complete)
 	GameManager.wolfman_hunted_changed.connect(func(_i: int): _refresh_inventory())
+	GameManager.mummy_changed.connect(_on_mummy_changed)
+	GameManager.mummy_soul_changed.connect(func(_i: int): _refresh_inventory())
 	VillagerManager.villager_rescued.connect(_on_villager_rescued)
 	GameManager.turn_changed.connect(_on_turn_changed)
 	GameManager.player_moved.connect(_on_player_moved)
@@ -54,6 +61,7 @@ func _ready() -> void:
 	GameManager.monster_defeated.connect(_on_monster_defeated)
 	GameManager.game_won.connect(_on_game_won)
 	GameManager.game_lost.connect(_on_game_lost)
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	MonsterManager.space_attacked.connect(_on_space_attacked)
 	MonsterManager.phase_completed.connect(_on_phase_completed)
 	_item_panel = ItemSelectionPanelScene.new()
@@ -266,6 +274,11 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 		GameManager.try_contribute_cure(selected_items)
 	elif _pending_action == "defeat_wolfman":
 		GameManager.try_defeat_wolfman(selected_items)
+	elif _pending_action == "advance_mummy":
+		if not selected_items.is_empty():
+			GameManager.try_advance_mummy(selected_items[0])
+	elif _pending_action == "defeat_mummy":
+		GameManager.try_defeat_mummy(selected_items)
 	elif _pending_action == "advance":
 		GameManager.try_advance(selected_items)
 	elif _pending_action == "defeat":
@@ -325,9 +338,14 @@ func _on_monster_defeated(_monster_name: String) -> void:
 
 func _on_game_won() -> void:
 	game_won_label.visible = true
+	main_menu_button.visible = true
 
 func _on_game_lost() -> void:
 	game_lost_label.visible = true
+	main_menu_button.visible = true
+
+func _on_main_menu_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 func _on_space_attacked(space_id: int, num_hits: int) -> void:
 	_hit_space_id = space_id
@@ -429,6 +447,31 @@ func _on_defeat_wolfman_pressed() -> void:
 func _on_wolfman_cure_complete(player_index: int) -> void:
 	monster_log.text = GameManager.players[player_index].display_name + " completed the cure and received The Cure!"
 
+
+func _on_advance_mummy_pressed() -> void:
+	var items := GameManager.get_advance_mummy_items()
+	if items.is_empty():
+		return
+	_pending_action = "advance_mummy"
+	_item_panel.open(items, 0, 0, "Select a yellow item to use on the scarab puzzle")
+
+
+func _on_defeat_mummy_pressed() -> void:
+	var active := GameManager.get_active_player()
+	if active == null:
+		return
+	var red_items: Array[ItemData] = []
+	for item in active.inventory:
+		if (item as ItemData).color == "red":
+			red_items.append(item as ItemData)
+	_pending_action = "defeat_mummy"
+	_item_panel.open(red_items, GameManager.get_item_strength_boost(), 9)
+
+
+func _on_mummy_changed() -> void:
+	_refresh_inventory()
+	_refresh_action_buttons()
+
 func _start_move_villager() -> void:
 	var active_space := GameManager.players[GameManager.active_player_index].current_space_id
 	var all_villagers: Array = []
@@ -469,6 +512,8 @@ func _refresh_action_buttons() -> void:
 	move_villager_button.visible = GameManager.can_move_villager()
 	cure_button.visible = GameManager.can_contribute_cure()
 	defeat_wolfman_button.visible = GameManager.can_defeat_wolfman()
+	advance_mummy_button.visible = GameManager.can_advance_mummy()
+	defeat_mummy_button.visible = GameManager.can_defeat_mummy()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
 		match active.character.special_id:
@@ -514,6 +559,14 @@ func _refresh_inventory() -> void:
 	if GameManager.wolfman_hunted_player == GameManager.active_player_index:
 		inventory_list.push_color(Color(0.85, 0.30, 0.05))
 		inventory_list.add_text("⚠ HUNTED by the Wolfman\n")
+		inventory_list.pop()
+	if GameManager.mummy_soul_player == GameManager.active_player_index:
+		inventory_list.push_color(Color(0.60, 0.35, 0.80))
+		inventory_list.add_text("☽ SOUL TOKEN — drawn to the Mummy\n")
+		inventory_list.pop()
+	if GameManager.mummy_moves_remaining > 0:
+		inventory_list.push_color(Color(0.85, 0.65, 0.10))
+		inventory_list.add_text("Mummy puzzle: " + str(GameManager.mummy_moves_remaining) + " move(s) — click a token\n")
 		inventory_list.pop()
 	for item in active.inventory:
 		var item_data := item as ItemData

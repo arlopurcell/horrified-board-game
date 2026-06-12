@@ -73,14 +73,29 @@ func open(items: Array[ItemData], strength_boost: int = 0, required_strength: in
 	for child in _item_list.get_children():
 		child.queue_free()
 	for item in items:
+		var row := HBoxContainer.new()
+		_item_list.add_child(row)
+		var swatch := ColorRect.new()
+		swatch.custom_minimum_size = Vector2(14, 14)
+		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		swatch.color = _item_swatch_color(item)
+		row.add_child(swatch)
 		var cb := CheckBox.new()
 		var effective := item.strength + _strength_boost
 		cb.text = "%s  (str %d)" % [item.item_name, effective]
 		cb.toggled.connect(_on_toggled)
-		_item_list.add_child(cb)
+		row.add_child(cb)
 		_checkboxes.append(cb)
 	_update_total()
 	visible = true
+
+func _item_swatch_color(item: ItemData) -> Color:
+	match item.color:
+		"red":    return Color(0.75, 0.22, 0.17)
+		"blue":   return Color(0.16, 0.50, 0.73)
+		"yellow": return Color(0.95, 0.77, 0.06)
+		_:        return Color(0.5, 0.5, 0.5, 0.0)
+
 
 func _on_toggled(_pressed: bool) -> void:
 	_update_total()

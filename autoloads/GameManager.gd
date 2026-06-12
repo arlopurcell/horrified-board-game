@@ -44,8 +44,22 @@ var wolfman_cure_s1: int = 0
 var wolfman_cure_s2: int = 0
 var wolfman_cure_s3: int = 0
 var wolfman_hunted_player: int = -1
+var mummy_slot_contents: Array[int] = []
+var mummy_slot_revealed: Array[bool] = []
+var mummy_moves_remaining: int = 0
+var mummy_soul_player: int = -1
 
 const TERROR_MAX := 7
+
+const MUMMY_ADJACENCY: Array = [
+	[1, 5, 6],
+	[0, 2, 6],
+	[1, 3, 6],
+	[2, 4, 6],
+	[3, 5, 6],
+	[4, 0, 6],
+	[0, 1, 2, 3, 4, 5],
+]
 
 signal monster_defeated(monster_name: String)
 signal game_won
@@ -54,6 +68,8 @@ signal perk_cards_changed
 signal terror_changed(level: int)
 signal wolfman_cure_complete(player_index: int)
 signal wolfman_hunted_changed(player_index: int)
+signal mummy_changed
+signal mummy_soul_changed(player_index: int)
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -82,6 +98,10 @@ func start_game(player_count: int) -> void:
 	wolfman_cure_s2 = 0
 	wolfman_cure_s3 = 0
 	wolfman_hunted_player = -1
+	mummy_slot_contents.clear()
+	mummy_slot_revealed.clear()
+	mummy_moves_remaining = 0
+	mummy_soul_player = -1
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -224,6 +244,9 @@ func end_turn() -> void:
 	phase_running = false
 	if game_over:
 		return
+	if mummy_moves_remaining > 0:
+		mummy_moves_remaining = 0
+		mummy_changed.emit()
 	active_player_index = (active_player_index + 1) % players.size()
 	var next_player := players[active_player_index]
 	if dead_players.has(active_player_index):
@@ -653,4 +676,178 @@ func try_explorer(space_id: int) -> bool:
 	players[active_player_index].current_space_id = space_id
 	player_moved.emit(active_player_index, space_id)
 	moves_remaining -= 1
+	return true
+
+
+func setup_mummy_puzzle() -> void:
+	mummy_slot_contents.clear()
+	mummy_slot_revealed.clear()
+	mummy_moves_remaining = 0
+	mummy_soul_player = -1
+	if _get_mummy() == null:
+		return
+	mummy_slot_contents.resize(7)
+	mummy_slot_revealed.resize(7)
+	var high := [4, 5, 6]
+	high.shuffle()
+	for i in range(3):
+		mummy_slot_contents[i] = high[i]
+		mummy_slot_revealed[i] = false
+	var low := [1, 2, 3]
+	low.shuffle()
+	for i in range(3):
+		mummy_slot_contents[3 + i] = low[i]
+		mummy_slot_revealed[3 + i] = false
+	mummy_slot_contents[6] = 0
+	mummy_slot_revealed[6] = true
+
+
+func _get_mummy() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Mummy":
+			return m
+	return null
+
+
+func can_advance_mummy() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	if _get_mummy() == null:
+		return false
+	if is_mummy_puzzle_solved():
+		return false
+	var museum_id := _find_space_by_name("Museum")
+	if players[active_player_index].current_space_id != museum_id:
+		return false
+	return not get_advance_mummy_items().is_empty()
+
+
+func get_advance_mummy_items() -> Array[ItemData]:
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it.color == "yellow":
+			result.append(it)
+	return result
+
+
+func try_advance_mummy(item: ItemData) -> bool:
+	if not can_advance_mummy():
+		return false
+	if item.color != "yellow":
+		return false
+	players[active_player_index].inventory.erase(item)
+	mummy_moves_remaining = item.strength
+	moves_remaining -= 1
+	items_changed.emit()
+	mummy_changed.emit()
+	return true
+
+
+func _mummy_empty_slot() -> int:
+	for i in range(mummy_slot_contents.size()):
+		if mummy_slot_contents[i] == 0:
+			return i
+	return -1
+
+
+func can_flip_mummy_token(slot_idx: int) -> bool:
+	if mummy_moves_remaining <= 0:
+		return false
+	if slot_idx < 0 or slot_idx >= mummy_slot_contents.size():
+		return false
+	if mummy_slot_contents[slot_idx] == 0:
+		return false
+	return not mummy_slot_revealed[slot_idx]
+
+
+func try_flip_mummy_token(slot_idx: int) -> bool:
+	if not can_flip_mummy_token(slot_idx):
+		return false
+	mummy_slot_revealed[slot_idx] = true
+	mummy_moves_remaining -= 1
+	mummy_changed.emit()
+	if is_mummy_puzzle_solved():
+		mummy_changed.emit()
+	return true
+
+
+func can_slide_mummy_token(slot_idx: int) -> bool:
+	if mummy_moves_remaining <= 0:
+		return false
+	if slot_idx < 0 or slot_idx >= mummy_slot_contents.size():
+		return false
+	if mummy_slot_contents[slot_idx] == 0:
+		return false
+	if not mummy_slot_revealed[slot_idx]:
+		return false
+	var empty := _mummy_empty_slot()
+	if empty < 0:
+		return false
+	return (MUMMY_ADJACENCY[slot_idx] as Array).has(empty)
+
+
+func try_slide_mummy_token(slot_idx: int) -> bool:
+	if not can_slide_mummy_token(slot_idx):
+		return false
+	var empty := _mummy_empty_slot()
+	mummy_slot_contents[empty] = mummy_slot_contents[slot_idx]
+	mummy_slot_revealed[empty] = mummy_slot_revealed[slot_idx]
+	mummy_slot_contents[slot_idx] = 0
+	mummy_slot_revealed[slot_idx] = true
+	mummy_moves_remaining -= 1
+	mummy_changed.emit()
+	return true
+
+
+func is_mummy_puzzle_solved() -> bool:
+	if mummy_slot_contents.size() < 7:
+		return false
+	for i in range(6):
+		if not mummy_slot_revealed[i]:
+			return false
+		if mummy_slot_contents[i] != i + 1:
+			return false
+	return true
+
+
+func can_defeat_mummy() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var mummy := _get_mummy()
+	if mummy == null:
+		return false
+	if not is_mummy_puzzle_solved():
+		return false
+	var player := players[active_player_index]
+	if player.current_space_id != mummy.current_space_id:
+		return false
+	for item in player.inventory:
+		if (item as ItemData).color == "red":
+			return true
+	return false
+
+
+func try_defeat_mummy(red_items: Array[ItemData]) -> bool:
+	if not can_defeat_mummy():
+		return false
+	var boost := get_item_strength_boost()
+	var total := 0
+	for item in red_items:
+		if not players[active_player_index].inventory.has(item) or item.color != "red":
+			return false
+		total += item.strength + boost
+	if total < 9:
+		return false
+	for item in red_items:
+		players[active_player_index].inventory.erase(item)
+	moves_remaining -= 1
+	mummy_soul_player = -1
+	mummy_soul_changed.emit(-1)
+	items_changed.emit()
+	monster_defeated.emit("Mummy")
+	MonsterManager.remove_monster("Mummy")
+	if MonsterManager.monsters.is_empty():
+		game_over = true
+		game_won.emit()
 	return true

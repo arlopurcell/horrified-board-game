@@ -28,6 +28,7 @@ func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void
 		monster.current_space_id = monster.starting_space_id
 	frenzied_monster_name = ""
 	_update_frenzied_monster()
+	GameManager.setup_mummy_puzzle()
 
 
 func _update_frenzied_monster() -> void:
@@ -194,6 +195,8 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_the_hunt_is_on(summary)
 		"On the Move":
 			_logic_on_the_move(summary)
+		"Reincarnated Soul":
+			_logic_reincarnated_soul(summary)
 		"The Innocent":
 			_logic_the_innocent(summary)
 		"Former Employer":
@@ -455,10 +458,6 @@ func _logic_on_the_move(summary: Array[String]) -> void:
 
 
 func _logic_the_hunt_is_on(summary: Array[String]) -> void:
-	if GameManager.wolfman_hunted_player < 0:
-		GameManager.wolfman_hunted_player = GameManager.active_player_index
-		GameManager.wolfman_hunted_changed.emit(GameManager.wolfman_hunted_player)
-		summary.append(GameManager.players[GameManager.wolfman_hunted_player].display_name + " is now being hunted")
 	var wolfman: MonsterData = null
 	for m in monsters:
 		if m.monster_name == "Wolfman":
@@ -466,6 +465,10 @@ func _logic_the_hunt_is_on(summary: Array[String]) -> void:
 			break
 	if wolfman == null:
 		return
+	if GameManager.wolfman_hunted_player < 0:
+		GameManager.wolfman_hunted_player = GameManager.active_player_index
+		GameManager.wolfman_hunted_changed.emit(GameManager.wolfman_hunted_player)
+		summary.append(GameManager.players[GameManager.wolfman_hunted_player].display_name + " is now being hunted")
 	var hunted_space := GameManager.players[GameManager.wolfman_hunted_player].current_space_id
 	var path := _bfs_path(wolfman.current_space_id, hunted_space)
 	if path.size() < 2:
@@ -499,6 +502,31 @@ func _logic_egyptian_expert(summary: Array[String]) -> void:
 	pearson.current_space_id = cave_id
 	VillagerManager.villagers_changed.emit()
 	summary.append("Prof. Pearson appeared at the Cave")
+
+
+func _logic_reincarnated_soul(summary: Array[String]) -> void:
+	var mummy: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Mummy":
+			mummy = m
+			break
+	if mummy == null:
+		return
+	if GameManager.mummy_soul_player < 0:
+		GameManager.mummy_soul_player = GameManager.active_player_index
+		GameManager.mummy_soul_changed.emit(GameManager.mummy_soul_player)
+		summary.append(GameManager.players[GameManager.mummy_soul_player].display_name + " received the Soul Token")
+	var soul_player := GameManager.players[GameManager.mummy_soul_player]
+	var path := _bfs_path(soul_player.current_space_id, mummy.current_space_id)
+	if path.size() < 2:
+		summary.append(soul_player.display_name + " is already at the Mummy's location")
+		return
+	var steps := mini(3, path.size() - 1)
+	soul_player.current_space_id = path[steps]
+	GameManager.player_moved.emit(GameManager.mummy_soul_player, soul_player.current_space_id)
+	var dest_space := GameManager.board_data.get_space(soul_player.current_space_id)
+	var dest_name := dest_space.name if dest_space != null else str(soul_player.current_space_id)
+	summary.append(soul_player.display_name + " drawn " + str(steps) + " step(s) toward the Mummy, now at " + dest_name)
 
 
 func _nearest_target_space(from_id: int) -> int:
@@ -580,11 +608,30 @@ func _trigger_power(monster: MonsterData) -> String:
 			return _power_dracula(monster)
 		"Wolfman":
 			return _power_wolfman(monster)
+		"Mummy":
+			return _power_mummy(monster)
 	return ""
 
 
 func _power_wolfman(_wolfman: MonsterData) -> String:
 	return "all targets at this location take a hit"
+
+
+func _power_mummy(_mummy: MonsterData) -> String:
+	if GameManager.mummy_slot_contents.is_empty():
+		return "no scarab tokens"
+	var min_token := 999
+	var min_idx := -1
+	for i in range(GameManager.mummy_slot_contents.size()):
+		var token: int = GameManager.mummy_slot_contents[i]
+		if token > 0 and GameManager.mummy_slot_revealed[i] and token < min_token:
+			min_token = token
+			min_idx = i
+	if min_idx < 0:
+		return "no revealed scarab tokens to flip"
+	GameManager.mummy_slot_revealed[min_idx] = false
+	GameManager.mummy_changed.emit()
+	return "scarab token " + str(min_token) + " flipped face-down"
 
 
 func _power_dracula(dracula: MonsterData) -> String:
