@@ -13,6 +13,8 @@ extends CanvasLayer
 @onready var game_won_label: Label = $GameWonLabel
 @onready var game_lost_label: Label = $GameLostLabel
 @onready var move_villager_button: Button = $MoveVillagerButton
+@onready var cure_button: Button = $CureButton
+@onready var defeat_wolfman_button: Button = $DefeatWolfmanButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -41,6 +43,10 @@ func _ready() -> void:
 	defeat_button.pressed.connect(_on_defeat_pressed)
 	special_button.pressed.connect(_on_special_pressed)
 	move_villager_button.pressed.connect(_on_move_villager_pressed)
+	cure_button.pressed.connect(_on_cure_pressed)
+	defeat_wolfman_button.pressed.connect(_on_defeat_wolfman_pressed)
+	GameManager.wolfman_cure_complete.connect(_on_wolfman_cure_complete)
+	GameManager.wolfman_hunted_changed.connect(func(_i: int): _refresh_inventory())
 	VillagerManager.villager_rescued.connect(_on_villager_rescued)
 	GameManager.turn_changed.connect(_on_turn_changed)
 	GameManager.player_moved.connect(_on_player_moved)
@@ -175,7 +181,8 @@ func _on_special_selected(choice_idx: int) -> void:
 			var player := GameManager.players[_hit_target_player]
 			var items: Array[ItemData] = []
 			for item in player.inventory:
-				items.append(item as ItemData)
+				if (item as ItemData).item_name != "The Cure":
+					items.append(item as ItemData)
 			_pending_action = "hit_item"
 			_item_panel.open(items, 0, 0)
 		else:
@@ -255,7 +262,11 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 		_pending_action = ""
 		_process_next_space_hit()
 		return
-	if _pending_action == "advance":
+	if _pending_action == "contribute_cure":
+		GameManager.try_contribute_cure(selected_items)
+	elif _pending_action == "defeat_wolfman":
+		GameManager.try_defeat_wolfman(selected_items)
+	elif _pending_action == "advance":
 		GameManager.try_advance(selected_items)
 	elif _pending_action == "defeat":
 		GameManager.try_defeat(selected_items)
@@ -362,7 +373,12 @@ func _process_next_space_hit() -> void:
 
 func _show_hit_block_choice() -> void:
 	var player := GameManager.players[_hit_target_player]
-	if player.inventory.is_empty():
+	var has_blockable := false
+	for item in player.inventory:
+		if (item as ItemData).item_name != "The Cure":
+			has_blockable = true
+			break
+	if not has_blockable:
 		_apply_hit_death()
 		return
 	_pending_action = "hit_choice"
@@ -391,6 +407,27 @@ func _on_villager_rescued(villager_name: String) -> void:
 
 func _on_move_villager_pressed() -> void:
 	_start_move_villager()
+
+func _on_cure_pressed() -> void:
+	var items := GameManager.get_contribute_cure_items()
+	if items.is_empty():
+		return
+	_pending_action = "contribute_cure"
+	_item_panel.open(items, 0, 0, "Select blue items to contribute to the cure")
+
+func _on_defeat_wolfman_pressed() -> void:
+	var active := GameManager.get_active_player()
+	if active == null:
+		return
+	var red_items: Array[ItemData] = []
+	for item in active.inventory:
+		if (item as ItemData).color == "red":
+			red_items.append(item as ItemData)
+	_pending_action = "defeat_wolfman"
+	_item_panel.open(red_items, GameManager.get_item_strength_boost())
+
+func _on_wolfman_cure_complete(player_index: int) -> void:
+	monster_log.text = GameManager.players[player_index].display_name + " completed the cure and received The Cure!"
 
 func _start_move_villager() -> void:
 	var active_space := GameManager.players[GameManager.active_player_index].current_space_id
@@ -430,6 +467,8 @@ func _refresh_action_buttons() -> void:
 	advance_button.visible = GameManager.can_advance()
 	defeat_button.visible = GameManager.can_defeat()
 	move_villager_button.visible = GameManager.can_move_villager()
+	cure_button.visible = GameManager.can_contribute_cure()
+	defeat_wolfman_button.visible = GameManager.can_defeat_wolfman()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
 		match active.character.special_id:
@@ -472,6 +511,10 @@ func _refresh_inventory() -> void:
 	inventory_list.clear()
 	if active == null:
 		return
+	if GameManager.wolfman_hunted_player == GameManager.active_player_index:
+		inventory_list.push_color(Color(0.85, 0.30, 0.05))
+		inventory_list.add_text("⚠ HUNTED by the Wolfman\n")
+		inventory_list.pop()
 	for item in active.inventory:
 		var item_data := item as ItemData
 		if item_data == null:

@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-monster_name = "Dracula"
-starting_space_id = 15
-frenzy_number = 1
+monster_name = "Wolfman"
+starting_space_id = 11
+frenzy_number = 5

@@ -117,6 +117,24 @@ text = "MOVE VILLAGER"
 theme_override_font_sizes/font_size = 13
 visible = false
 
+[node name="CureButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 350.0
+offset_right = 250.0
+offset_bottom = 390.0
+text = "CONTRIBUTE TO CURE"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="DefeatWolfmanButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 395.0
+offset_right = 250.0
+offset_bottom = 435.0
+text = "DEFEAT WOLFMAN"
+theme_override_font_sizes/font_size = 13
+visible = false
+
 [node name="SpecialButton" type="Button" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0

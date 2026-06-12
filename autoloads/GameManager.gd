@@ -40,6 +40,10 @@ var _perk_deck_remaining: Array[PerkCardData] = []
 var terror_level: int = 0
 var dead_players: Dictionary = {}   # player_index (int) -> true
 var last_move_from_space: int = -1
+var wolfman_cure_s1: int = 0
+var wolfman_cure_s2: int = 0
+var wolfman_cure_s3: int = 0
+var wolfman_hunted_player: int = -1
 
 const TERROR_MAX := 7
 
@@ -48,6 +52,8 @@ signal game_won
 signal game_lost
 signal perk_cards_changed
 signal terror_changed(level: int)
+signal wolfman_cure_complete(player_index: int)
+signal wolfman_hunted_changed(player_index: int)
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -72,6 +78,10 @@ func start_game(player_count: int) -> void:
 	game_over = false
 	terror_level = 0
 	dead_players.clear()
+	wolfman_cure_s1 = 0
+	wolfman_cure_s2 = 0
+	wolfman_cure_s3 = 0
+	wolfman_hunted_player = -1
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -464,6 +474,123 @@ func try_professor(target_player_index: int, space_id: int) -> bool:
 	player_moved.emit(target_player_index, space_id)
 	moves_remaining -= 1
 	return true
+
+func _get_wolfman() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Wolfman":
+			return m
+	return null
+
+
+func can_contribute_cure() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	if _get_wolfman() == null:
+		return false
+	var lab_id := _find_space_by_name("Laboratory")
+	if players[active_player_index].current_space_id != lab_id:
+		return false
+	return not get_contribute_cure_items().is_empty()
+
+
+func get_contribute_cure_items() -> Array[ItemData]:
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var i := item as ItemData
+		if i.color != "blue":
+			continue
+		if i.strength == 1 and wolfman_cure_s1 < 2:
+			result.append(i)
+		elif i.strength == 2 and wolfman_cure_s2 < 2:
+			result.append(i)
+		elif i.strength == 3 and wolfman_cure_s3 < 2:
+			result.append(i)
+	return result
+
+
+func try_contribute_cure(items: Array[ItemData]) -> bool:
+	if not can_contribute_cure():
+		return false
+	var current_player := players[active_player_index]
+	for item in items:
+		if not current_player.inventory.has(item):
+			continue
+		match item.strength:
+			1:
+				if wolfman_cure_s1 < 2:
+					wolfman_cure_s1 += 1
+					current_player.inventory.erase(item)
+			2:
+				if wolfman_cure_s2 < 2:
+					wolfman_cure_s2 += 1
+					current_player.inventory.erase(item)
+			3:
+				if wolfman_cure_s3 < 2:
+					wolfman_cure_s3 += 1
+					current_player.inventory.erase(item)
+	moves_remaining -= 1
+	items_changed.emit()
+	if wolfman_cure_s1 >= 2 and wolfman_cure_s2 >= 2 and wolfman_cure_s3 >= 2:
+		_give_the_cure(active_player_index)
+	return true
+
+
+func _give_the_cure(player_index: int) -> void:
+	var cure := ItemData.new()
+	cure.item_name = "The Cure"
+	cure.color = ""
+	cure.strength = 0
+	players[player_index].inventory.append(cure)
+	wolfman_cure_complete.emit(player_index)
+	items_changed.emit()
+
+
+func can_defeat_wolfman() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var wolfman := _get_wolfman()
+	if wolfman == null:
+		return false
+	var player := players[active_player_index]
+	if player.current_space_id != wolfman.current_space_id:
+		return false
+	for item in player.inventory:
+		if (item as ItemData).item_name == "The Cure":
+			return true
+	return false
+
+
+func try_defeat_wolfman(red_items: Array[ItemData]) -> bool:
+	if not can_defeat_wolfman():
+		return false
+	var current_player := players[active_player_index]
+	var boost := get_item_strength_boost()
+	var total := 0
+	for item in red_items:
+		if not current_player.inventory.has(item) or item.color != "red":
+			return false
+		total += item.strength + boost
+	if total < 6:
+		return false
+	var cure_item: ItemData = null
+	for item in current_player.inventory:
+		if (item as ItemData).item_name == "The Cure":
+			cure_item = item as ItemData
+			break
+	if cure_item == null:
+		return false
+	current_player.inventory.erase(cure_item)
+	for item in red_items:
+		current_player.inventory.erase(item)
+	moves_remaining -= 1
+	items_changed.emit()
+	monster_defeated.emit("Wolfman")
+	MonsterManager.remove_monster("Wolfman")
+	if MonsterManager.monsters.is_empty():
+		game_over = true
+		game_won.emit()
+	return true
+
 
 func get_monster_spaces() -> Array[int]:
 	var spaces: Array[int] = []

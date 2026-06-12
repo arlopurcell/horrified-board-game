@@ -10,11 +10,13 @@ signal card_display_done
 signal monster_relocated
 signal space_attacked(space_id: int, num_hits: int)
 signal hit_resolved
+signal frenzy_changed
 
 var monsters: Array[MonsterData] = []
 var draw_pile: Array[MonsterCardData] = []
 var discard_pile: Array[MonsterCardData] = []
 var skip_next_phase: bool = false
+var frenzied_monster_name: String = ""
 
 
 func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void:
@@ -24,14 +26,33 @@ func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void
 	discard_pile.clear()
 	for monster in monsters:
 		monster.current_space_id = monster.starting_space_id
+	frenzied_monster_name = ""
+	_update_frenzied_monster()
+
+
+func _update_frenzied_monster() -> void:
+	var lowest := 999999
+	var name := ""
+	for m in monsters:
+		if m.frenzy_number < lowest:
+			lowest = m.frenzy_number
+			name = m.monster_name
+	if name != frenzied_monster_name:
+		frenzied_monster_name = name
+		frenzy_changed.emit()
 
 
 func remove_monster(monster_name: String) -> void:
+	var removed := false
 	for i in range(monsters.size() - 1, -1, -1):
 		if monsters[i].monster_name == monster_name:
 			monsters.remove_at(i)
-			return
-	push_warning("MonsterManager.remove_monster: '%s' not found" % monster_name)
+			removed = true
+			break
+	if not removed:
+		push_warning("MonsterManager.remove_monster: '%s' not found" % monster_name)
+		return
+	_update_frenzied_monster()
 
 
 func run_phase() -> void:
@@ -65,13 +86,17 @@ func run_phase() -> void:
 	var attack_dice: Array = []
 	var hit_spaces: Dictionary = {}   # space_id -> int
 	for monster_name: String in card.monster_names:
+		var resolved_name := monster_name
+		if resolved_name == "Frenzy":
+			if frenzied_monster_name == "":
+				continue
+			resolved_name = frenzied_monster_name
 		var monster: MonsterData = null
 		for m in monsters:
-			if m.monster_name == monster_name:
+			if m.monster_name == resolved_name:
 				monster = m
 				break
 		if monster == null:
-			push_warning("MonsterManager: card references unknown monster '%s'" % monster_name)
 			continue
 		var target_space := _nearest_target_space(monster.current_space_id)
 		if target_space == -1:
@@ -117,6 +142,16 @@ func run_phase() -> void:
 			if power_triggered:
 				var power_note := _trigger_power(monster)
 				atk_text += " [POWER: " + power_note + "]"
+				if monster.monster_name == "Wolfman":
+					var extra := 0
+					for p in GameManager.players:
+						if p.current_space_id == destination:
+							extra += 1
+					for v in VillagerManager.villagers:
+						if (v as VillagerData).current_space_id == destination:
+							extra += 1
+					if extra > 0:
+						hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + extra
 			summary_parts.append(atk_text)
 			if hits > 0:
 				hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + hits
@@ -155,6 +190,10 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_hurried_assistant(summary)
 		"The Delivery":
 			_logic_the_delivery(summary)
+		"The Hunt Is On":
+			_logic_the_hunt_is_on(summary)
+		"On the Move":
+			_logic_on_the_move(summary)
 		"The Innocent":
 			_logic_the_innocent(summary)
 		"Former Employer":
@@ -381,6 +420,67 @@ func _logic_the_ichthyologist(summary: Array[String]) -> void:
 	summary.append("Dr. Reed appeared at the Institute")
 
 
+func _logic_on_the_move(summary: Array[String]) -> void:
+	if monsters.size() > 1:
+		var sorted := monsters.duplicate()
+		sorted.sort_custom(func(a: MonsterData, b: MonsterData) -> bool:
+			return a.frenzy_number < b.frenzy_number)
+		var current_idx := 0
+		for i in range(sorted.size()):
+			if (sorted[i] as MonsterData).monster_name == frenzied_monster_name:
+				current_idx = i
+				break
+		var next_name: String = (sorted[(current_idx + 1) % sorted.size()] as MonsterData).monster_name
+		frenzied_monster_name = next_name
+		frenzy_changed.emit()
+		summary.append("Frenzy marker moved to " + frenzied_monster_name)
+	elif monsters.size() == 1:
+		summary.append("Frenzy marker stays on " + frenzied_monster_name)
+	if GameManager.board_data == null:
+		return
+	var villager_snapshot := VillagerManager.villagers.duplicate()
+	var moved := 0
+	for v_ref in villager_snapshot:
+		var v := v_ref as VillagerData
+		if not VillagerManager.villagers.has(v):
+			continue
+		if v.current_space_id < 0 or v.current_space_id == v.target_space_id:
+			continue
+		var path := _bfs_path(v.current_space_id, v.target_space_id)
+		if path.size() >= 2:
+			VillagerManager.move_villager(v, path[1])
+			moved += 1
+	if moved > 0:
+		summary.append(str(moved) + " villager(s) moved toward their targets")
+
+
+func _logic_the_hunt_is_on(summary: Array[String]) -> void:
+	if GameManager.wolfman_hunted_player < 0:
+		GameManager.wolfman_hunted_player = GameManager.active_player_index
+		GameManager.wolfman_hunted_changed.emit(GameManager.wolfman_hunted_player)
+		summary.append(GameManager.players[GameManager.wolfman_hunted_player].display_name + " is now being hunted")
+	var wolfman: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Wolfman":
+			wolfman = m
+			break
+	if wolfman == null:
+		return
+	var hunted_space := GameManager.players[GameManager.wolfman_hunted_player].current_space_id
+	var path := _bfs_path(wolfman.current_space_id, hunted_space)
+	if path.size() < 2:
+		summary.append("Wolfman is already at the hunted player's location")
+		return
+	var steps := mini(3, path.size() - 1)
+	wolfman.current_space_id = path[steps]
+	var dest_space := GameManager.board_data.get_space(wolfman.current_space_id)
+	var dest_name := dest_space.name if dest_space != null else str(wolfman.current_space_id)
+	summary.append("Wolfman stalked " + str(steps) + " step(s) toward " +
+			GameManager.players[GameManager.wolfman_hunted_player].display_name +
+			", now at " + dest_name)
+	monster_relocated.emit()
+
+
 func _logic_egyptian_expert(summary: Array[String]) -> void:
 	var pearson: VillagerData = null
 	for v in VillagerManager.villagers:
@@ -478,7 +578,13 @@ func _trigger_power(monster: MonsterData) -> String:
 	match monster.monster_name:
 		"Dracula":
 			return _power_dracula(monster)
+		"Wolfman":
+			return _power_wolfman(monster)
 	return ""
+
+
+func _power_wolfman(_wolfman: MonsterData) -> String:
+	return "all targets at this location take a hit"
 
 
 func _power_dracula(dracula: MonsterData) -> String:
