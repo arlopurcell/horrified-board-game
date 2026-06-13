@@ -170,6 +170,11 @@ func _process_monster_for_card(monster: MonsterData, card: MonsterCardData,
 	monster.current_space_id = destination
 	var dest_space := GameManager.board_data.get_space(destination)
 	var dest_name := dest_space.name if dest_space != null else str(destination)
+	var frank := _find_monster("Frankenstein")
+	var bride := _find_monster("Bride")
+	if frank != null and bride != null and frank.current_space_id == bride.current_space_id:
+		summary_parts.append(monster.monster_name + " moved to " + dest_name + " (meeting!)")
+		return
 	var targets_here := false
 	for p in GameManager.players:
 		if p.current_space_id == destination:

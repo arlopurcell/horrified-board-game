@@ -892,7 +892,7 @@ func can_advance_frankenstein() -> bool:
 	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
 		return false
 	var frank := _get_frankenstein()
-	if frank == null or frank.dial_value >= frank.dial_max:
+	if frank == null:
 		return false
 	if players[active_player_index].current_space_id != frank.current_space_id:
 		return false
@@ -952,7 +952,7 @@ func can_advance_bride() -> bool:
 	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
 		return false
 	var bride := _get_bride()
-	if bride == null or bride.dial_value >= bride.dial_max:
+	if bride == null:
 		return false
 	if players[active_player_index].current_space_id != bride.current_space_id:
 		return false

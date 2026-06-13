@@ -21,12 +21,12 @@ func setup(monster_list: Array[MonsterData], board: Board, camera: Camera2D = nu
 
 func _on_monster_defeated(monster_name: String) -> void:
 	var idx := -1
-	for i in range(MonsterManager.monsters.size()):
-		if MonsterManager.monsters[i].monster_name == monster_name:
+	for i in range(_tokens.size()):
+		if _tokens[i].monster_name == monster_name:
 			idx = i
 			break
 	if idx == -1:
-		push_error("Monsters.gd: no monster named '%s' found for removal" % monster_name)
+		push_error("Monsters.gd: no token found for defeated monster '%s'" % monster_name)
 		return
 	_tokens[idx].queue_free()
 	_tokens.remove_at(idx)

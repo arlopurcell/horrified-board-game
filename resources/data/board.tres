@@ -48,14 +48,14 @@ neighbors = [9]
 [sub_resource type="Resource" id="Bridge1"]
 script = ExtResource("2")
 id = 6
-name = ""
+name = "North Bridge"
 position = Vector2(530, 265)
 neighbors = [1, 7, 11, 23, 24]
 
 [sub_resource type="Resource" id="Fountain"]
 script = ExtResource("2")
 id = 7
-name = ""
+name = "Fountain"
 position = Vector2(750, 265)
 neighbors = [6, 2, 3, 8]
 
@@ -90,7 +90,7 @@ neighbors = [10, 6, 12]
 [sub_resource type="Resource" id="Lamp"]
 script = ExtResource("2")
 id = 12
-name = ""
+name = "Lampost"
 position = Vector2(425, 510)
 neighbors = [11, 16, 14, 18]
 
@@ -125,7 +125,7 @@ neighbors = [12]
 [sub_resource type="Resource" id="Bridge2"]
 script = ExtResource("2")
 id = 17
-name = ""
+name = "South Bridge"
 position = Vector2(860, 380)
 neighbors = [8, 14, 24, 25]
 

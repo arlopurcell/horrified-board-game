@@ -8,9 +8,11 @@ const BORDER_COLOR := Color(0.80, 0.10, 0.10)
 const LABEL_COLOR := Color.WHITE
 const FONT_SIZE := 13
 
+var monster_name: String = ""
 var _label: String = ""
 
 func setup(data: MonsterData) -> void:
+	monster_name = data.monster_name
 	_label = data.monster_name.left(1)
 	queue_redraw()
 

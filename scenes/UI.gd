@@ -372,9 +372,12 @@ func _on_player_moved(player_index: int, space_id: int) -> void:
 	if player_index == GameManager.active_player_index and GameManager.last_move_from_space >= 0:
 		var from := GameManager.last_move_from_space
 		GameManager.last_move_from_space = -1
-		var here := VillagerManager.get_villagers_at(from)
-		if not here.is_empty():
-			_start_bring_along(here, space_id)
+		var from_space := GameManager.board_data.get_space(from) if GameManager.board_data != null else null
+		var is_adjacent := from_space != null and from_space.neighbors.has(space_id)
+		if is_adjacent:
+			var here := VillagerManager.get_villagers_at(from)
+			if not here.is_empty():
+				_start_bring_along(here, space_id)
 
 func _on_items_changed() -> void:
 	_refresh_inventory()
