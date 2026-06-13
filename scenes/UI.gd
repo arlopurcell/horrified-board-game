@@ -20,6 +20,8 @@ extends CanvasLayer
 @onready var defeat_mummy_button: Button = $DefeatMummyButton
 @onready var advance_frankenstein_button: Button = $AdvanceFrankensteinButton
 @onready var advance_bride_button: Button = $AdvanceBrideButton
+@onready var advance_creature_button: Button = $AdvanceCreatureButton
+@onready var defeat_creature_button: Button = $DefeatCreatureButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -54,7 +56,10 @@ func _ready() -> void:
 	defeat_mummy_button.pressed.connect(_on_defeat_mummy_pressed)
 	advance_frankenstein_button.pressed.connect(_on_advance_frankenstein_pressed)
 	advance_bride_button.pressed.connect(_on_advance_bride_pressed)
+	advance_creature_button.pressed.connect(_on_advance_creature_pressed)
+	defeat_creature_button.pressed.connect(_on_defeat_creature_pressed)
 	GameManager.frankenstein_changed.connect(_on_frankenstein_changed)
+	GameManager.creature_changed.connect(_on_creature_changed)
 	GameManager.wolfman_cure_complete.connect(_on_wolfman_cure_complete)
 	GameManager.wolfman_hunted_changed.connect(func(_i: int): _refresh_inventory())
 	GameManager.mummy_changed.connect(_on_mummy_changed)
@@ -330,6 +335,11 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 			_pending_action = "move_bride"
 			_special_panel.open("Move the Bride (up to %d spaces):" % GameManager.bride_pending_strength, labels)
 			return
+	elif _pending_action == "advance_creature":
+		if not selected_items.is_empty():
+			GameManager.try_advance_creature(selected_items[0])
+	elif _pending_action == "defeat_creature":
+		GameManager.try_defeat_creature(selected_items)
 	elif _pending_action == "advance":
 		GameManager.try_advance(selected_items)
 	elif _pending_action == "defeat":
@@ -546,6 +556,29 @@ func _on_advance_bride_pressed() -> void:
 func _on_frankenstein_changed() -> void:
 	_refresh_action_buttons()
 
+
+func _on_advance_creature_pressed() -> void:
+	var items := GameManager.get_advance_creature_items()
+	if items.is_empty():
+		return
+	_pending_action = "advance_creature"
+	_item_panel.open(items, 0, 0, "Select any item to advance the Creature indicator")
+
+
+func _on_defeat_creature_pressed() -> void:
+	var active := GameManager.get_active_player()
+	if active == null:
+		return
+	var items: Array[ItemData] = []
+	for item in active.inventory:
+		items.append(item as ItemData)
+	_pending_action = "defeat_creature"
+	_item_panel.open(items, 0, 0, "Select 1 red, 1 yellow, and 1 blue item", ["red", "yellow", "blue"])
+
+
+func _on_creature_changed() -> void:
+	_refresh_action_buttons()
+
 func _start_move_villager() -> void:
 	var active_space := GameManager.players[GameManager.active_player_index].current_space_id
 	var all_villagers: Array = []
@@ -590,6 +623,8 @@ func _refresh_action_buttons() -> void:
 	defeat_mummy_button.visible = GameManager.can_defeat_mummy()
 	advance_frankenstein_button.visible = GameManager.can_advance_frankenstein()
 	advance_bride_button.visible = GameManager.can_advance_bride()
+	advance_creature_button.visible = GameManager.can_advance_creature()
+	defeat_creature_button.visible = GameManager.can_defeat_creature()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
 		match active.character.special_id:

@@ -183,7 +183,7 @@ is_water = true
 [sub_resource type="Resource" id="Riverfront"]
 script = ExtResource("2")
 id = 25
-name = "Riverfront"
+name = "Waterfront"
 position = Vector2(1100, 480)
 neighbors = [13, 17, 22]
 is_water = true

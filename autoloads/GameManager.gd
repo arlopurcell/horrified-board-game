@@ -50,6 +50,9 @@ var mummy_moves_remaining: int = 0
 var mummy_soul_player: int = -1
 var frank_pending_strength: int = 0
 var bride_pending_strength: int = 0
+var creature_path_index: int = 0
+
+const CREATURE_PATH: Array[String] = ["red","yellow","blue","red","blue","yellow","red","blue","yellow","blue","yellow","red","blue","red","yellow","blue","yellow","red","blue"]
 
 const TERROR_MAX := 7
 
@@ -73,6 +76,7 @@ signal wolfman_hunted_changed(player_index: int)
 signal mummy_changed
 signal mummy_soul_changed(player_index: int)
 signal frankenstein_changed
+signal creature_changed
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -107,6 +111,7 @@ func start_game(player_count: int) -> void:
 	mummy_soul_player = -1
 	frank_pending_strength = 0
 	bride_pending_strength = 0
+	creature_path_index = 0
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -1034,3 +1039,94 @@ func check_frankenstein_meeting() -> void:
 		if terror_level >= TERROR_MAX:
 			game_over = true
 			game_lost.emit()
+
+
+func _get_creature() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Creature":
+			return m
+	return null
+
+
+func can_advance_creature() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	if _get_creature() == null:
+		return false
+	if players[active_player_index].current_space_id != 1:  # Camp
+		return false
+	return not get_advance_creature_items().is_empty()
+
+
+func get_advance_creature_items() -> Array[ItemData]:
+	if creature_path_index >= CREATURE_PATH.size():
+		return []
+	var available_colors: Dictionary = {}
+	for i in range(creature_path_index, CREATURE_PATH.size()):
+		available_colors[CREATURE_PATH[i]] = true
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if available_colors.has(it.color):
+			result.append(it)
+	return result
+
+
+func try_advance_creature(item: ItemData) -> bool:
+	if not can_advance_creature():
+		return false
+	for i in range(creature_path_index, CREATURE_PATH.size()):
+		if CREATURE_PATH[i] == item.color:
+			players[active_player_index].inventory.erase(item)
+			creature_path_index = i + 1
+			moves_remaining -= 1
+			items_changed.emit()
+			creature_changed.emit()
+			return true
+	return false
+
+
+func can_defeat_creature() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var creature := _get_creature()
+	if creature == null or creature_path_index < CREATURE_PATH.size():
+		return false
+	if players[active_player_index].current_space_id != creature.current_space_id:
+		return false
+	var has_red := false
+	var has_yellow := false
+	var has_blue := false
+	for item in players[active_player_index].inventory:
+		match (item as ItemData).color:
+			"red": has_red = true
+			"yellow": has_yellow = true
+			"blue": has_blue = true
+	return has_red and has_yellow and has_blue
+
+
+func try_defeat_creature(items: Array[ItemData]) -> bool:
+	if not can_defeat_creature():
+		return false
+	var has_red := false
+	var has_yellow := false
+	var has_blue := false
+	for item in items:
+		match item.color:
+			"red": has_red = true
+			"yellow": has_yellow = true
+			"blue": has_blue = true
+	if not (has_red and has_yellow and has_blue):
+		return false
+	for item in items:
+		players[active_player_index].inventory.erase(item)
+	moves_remaining -= 1
+	items_changed.emit()
+	creature_path_index = 0
+	creature_changed.emit()
+	monster_defeated.emit("Creature")
+	MonsterManager.remove_monster("Creature")
+	if MonsterManager.monsters.is_empty():
+		game_over = true
+		game_won.emit()
+	return true

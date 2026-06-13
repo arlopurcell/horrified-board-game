@@ -151,11 +151,12 @@ func _find_monster(monster_name: String) -> MonsterData:
 
 func _process_monster_for_card(monster: MonsterData, card: MonsterCardData,
 		move_data: Array, power_move_data: Array, attack_dice: Array, hit_spaces: Dictionary, summary_parts: Array) -> void:
-	var target_space := _nearest_target_space(monster.current_space_id)
+	var allow_water := monster.can_move_through_water
+	var target_space := _nearest_target_space(monster.current_space_id, allow_water)
 	if target_space == -1:
 		summary_parts.append(monster.monster_name + " didn't move")
 		return
-	var path := _bfs_path(monster.current_space_id, target_space)
+	var path := _bfs_path(monster.current_space_id, target_space, allow_water)
 	var destination: int
 	if path.is_empty():
 		destination = monster.current_space_id
@@ -249,6 +250,12 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_the_innocent(summary)
 		"Former Employer":
 			_logic_former_employer(summary)
+		"Retreat (Lagoon)":
+			_logic_creature_retreat("Lagoon", summary)
+		"Retreat (River)":
+			_logic_creature_retreat("River", summary)
+		"Retreat (Waterfront)":
+			_logic_creature_retreat("Waterfront", summary)
 
 
 func _logic_sunrise(summary: Array[String]) -> void:
@@ -606,6 +613,28 @@ func _logic_the_meeting(summary: Array[String]) -> void:
 	GameManager.check_frankenstein_meeting()
 
 
+func _logic_creature_retreat(space_name: String, summary: Array[String]) -> void:
+	var creature: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Creature":
+			creature = m
+			break
+	if creature == null:
+		return
+	if GameManager.board_data == null:
+		return
+	var target_id := -1
+	for space in GameManager.board_data.spaces:
+		if space.name == space_name:
+			target_id = space.id
+			break
+	if target_id == -1:
+		return
+	creature.current_space_id = target_id
+	monster_relocated.emit()
+	summary.append("Creature retreated to the " + space_name)
+
+
 func _nearest_target_space(from_id: int, allow_water: bool = false) -> int:
 	if GameManager.board_data == null:
 		return -1
@@ -693,6 +722,8 @@ func _trigger_power(monster: MonsterData, power_move_data: Array) -> String:
 			return _power_mummy(monster)
 		"Frankenstein", "Bride":
 			return _power_frankenstein_or_bride(power_move_data)
+		"Creature":
+			return _power_creature()
 	return ""
 
 
@@ -739,6 +770,14 @@ func _power_frankenstein_or_bride(power_move_data: Array) -> String:
 	var dest_space := GameManager.board_data.get_space(bride.current_space_id)
 	var dest_name := dest_space.name if dest_space != null else str(bride.current_space_id)
 	return "Bride moved 1 step toward Frankenstein, now at " + dest_name
+
+
+func _power_creature() -> String:
+	if GameManager.creature_path_index > 0:
+		GameManager.creature_path_index -= 1
+		GameManager.creature_changed.emit()
+		return "indicator moved back (now at position %d)" % GameManager.creature_path_index
+	return "indicator is already at the start"
 
 
 func _power_dracula(dracula: MonsterData) -> String:

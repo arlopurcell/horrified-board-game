@@ -35,6 +35,7 @@ func _ready() -> void:
 	GameManager.wolfman_cure_complete.connect(func(_i: int): queue_redraw())
 	GameManager.mummy_changed.connect(queue_redraw)
 	GameManager.frankenstein_changed.connect(queue_redraw)
+	GameManager.creature_changed.connect(queue_redraw)
 	MonsterManager.frenzy_changed.connect(queue_redraw)
 
 func _draw() -> void:
@@ -57,6 +58,9 @@ func _draw() -> void:
 			px += PANEL_W + PANEL_GAP
 		elif m.monster_name == "Bride":
 			continue
+		elif m.monster_name == "Creature":
+			_draw_creature(font, px)
+			px += PANEL_W + PANEL_GAP
 		else:
 			continue
 		if frenzied:
@@ -274,6 +278,76 @@ func _draw_frankenstein_bride(font: Font, px: float) -> void:
 		var pip_col := Color(0.16, 0.50, 0.73) if filled else Color(0.10, 0.14, 0.25)
 		draw_rect(Rect2(pip_x, pip_y, pip, pip), pip_col)
 		draw_rect(Rect2(pip_x, pip_y, pip, pip), BOX_BORDER, false, 1.0)
+
+
+func _creature_dot_color(path_pos: int) -> Color:
+	if path_pos == 0:
+		return Color(0.15, 0.15, 0.15)  # black start
+	if path_pos >= GameManager.CREATURE_PATH.size():
+		return Color(0.16, 0.50, 0.73)  # Lair (blue)
+	match GameManager.CREATURE_PATH[path_pos - 1]:
+		"red": return Color(0.75, 0.22, 0.17)
+		"yellow": return Color(0.95, 0.77, 0.06)
+		"blue": return Color(0.16, 0.50, 0.73)
+	return Color(0.5, 0.5, 0.5)
+
+
+func _draw_creature(font: Font, px: float) -> void:
+	const DOT_R := 7.0
+	const H_STEP := 23.0
+	const V_STEP := 24.0
+	const DOTS := 20  # positions 0-19
+
+	var path_w := H_STEP * 6.0
+	var x0 := px + (PANEL_W - path_w) * 0.5
+	var y0 := PANEL_Y + TITLE_H + H_PAD + DOT_R
+	var panel_h := TITLE_H + H_PAD + V_STEP * 2.0 + DOT_R * 2.0 + H_PAD + 14.0
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
+	var ta := font.get_ascent(FS_TITLE)
+	var td := font.get_descent(FS_TITLE)
+	draw_string(font, Vector2(px, PANEL_Y + TITLE_H * 0.5 + (ta - td) * 0.5),
+			"CREATURE", HORIZONTAL_ALIGNMENT_CENTER, PANEL_W, FS_TITLE, TEXT_COL)
+
+	var positions: Array[Vector2] = []
+	for i in range(DOTS):
+		var row: int
+		var col: int
+		if i <= 6:
+			row = 0
+			col = i
+		elif i <= 13:
+			row = 1
+			col = 13 - i  # right to left
+		else:
+			row = 2
+			col = i - 14
+		positions.append(Vector2(x0 + col * H_STEP, y0 + row * V_STEP))
+
+	for i in range(DOTS - 1):
+		draw_line(positions[i], positions[i + 1], Color(0.4, 0.4, 0.4, 0.7), 1.5)
+
+	var path_idx := GameManager.creature_path_index
+	var la := font.get_ascent(FS_ROW - 2)
+	var ld := font.get_descent(FS_ROW - 2)
+
+	for i in range(DOTS):
+		var pos := positions[i]
+		var col := _creature_dot_color(i)
+		draw_circle(pos, DOT_R, col)
+		draw_arc(pos, DOT_R, 0, TAU, 24, Color(0.6, 0.6, 0.6, 0.8), 1.0)
+		var xh := DOT_R * 0.5
+		draw_line(pos + Vector2(-xh, -xh), pos + Vector2(xh, xh), Color(0.9, 0.9, 0.9), 1.5)
+		draw_line(pos + Vector2(xh, -xh), pos + Vector2(-xh, xh), Color(0.9, 0.9, 0.9), 1.5)
+		if i == 19:
+			draw_string(font,
+					Vector2(pos.x - 14.0, pos.y + DOT_R + 2.0 + (la + la - ld) * 0.5),
+					"LAIR", HORIZONTAL_ALIGNMENT_CENTER, 28.0, FS_ROW - 2,
+					Color(0.16, 0.50, 0.73))
+
+	var ind_pos := positions[path_idx]
+	draw_arc(ind_pos, DOT_R + 3.0, 0, TAU, 24, Color(1.0, 0.85, 0.0), 2.5)
 
 
 func _draw_frenzy_icon(px: float) -> void:

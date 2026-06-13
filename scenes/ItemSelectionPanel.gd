@@ -11,6 +11,7 @@ var _checkboxes: Array[CheckBox] = []
 var _strength_boost: int = 0
 var _required_strength: int = REQUIRED_STRENGTH
 var _custom_message: String = ""
+var _required_colors: Array[String] = []
 var _total_label: Label
 var _confirm_btn: Button
 var _item_list: VBoxContainer
@@ -64,11 +65,12 @@ func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirmed)
 	btn_row.add_child(_confirm_btn)
 
-func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "") -> void:
+func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "", required_colors: Array[String] = []) -> void:
 	_items = items
 	_strength_boost = strength_boost
 	_required_strength = required_strength
 	_custom_message = custom_message
+	_required_colors = required_colors.duplicate()
 	_checkboxes.clear()
 	for child in _item_list.get_children():
 		child.queue_free()
@@ -103,11 +105,21 @@ func _on_toggled(_pressed: bool) -> void:
 func _update_total() -> void:
 	var total := 0
 	var count := 0
+	var selected_colors: Dictionary = {}
 	for i in range(_checkboxes.size()):
 		if _checkboxes[i].button_pressed:
 			total += _items[i].strength + _strength_boost
 			count += 1
-	if _required_strength <= 0:
+			selected_colors[_items[i].color] = true
+	if not _required_colors.is_empty():
+		var all_present := true
+		for c in _required_colors:
+			if not selected_colors.has(c):
+				all_present = false
+				break
+		_total_label.text = _custom_message if _custom_message != "" else "Select 1 of each required color"
+		_confirm_btn.disabled = not all_present
+	elif _required_strength <= 0:
 		_total_label.text = _custom_message if _custom_message != "" else "Select any item to block the hit"
 		_confirm_btn.disabled = count == 0
 	else:

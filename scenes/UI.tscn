@@ -171,6 +171,24 @@ text = "ADVANCE BRIDE"
 theme_override_font_sizes/font_size = 13
 visible = false
 
+[node name="AdvanceCreatureButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 620.0
+offset_right = 250.0
+offset_bottom = 660.0
+text = "ADVANCE CREATURE"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="DefeatCreatureButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 665.0
+offset_right = 250.0
+offset_bottom = 705.0
+text = "DEFEAT CREATURE"
+theme_override_font_sizes/font_size = 13
+visible = false
+
 [node name="SpecialButton" type="Button" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0
