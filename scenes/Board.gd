@@ -4,6 +4,7 @@ extends Node2D
 const SpaceNodeScene := preload("res://scenes/SpaceNode.tscn")
 
 const CONNECTION_COLOR := Color(0.353, 0.235, 0.1, 0.5)
+const WATER_CONNECTION_COLOR := Color(0.20, 0.48, 0.78, 0.65)
 const CONNECTION_WIDTH := 4.0
 const BORDER_COLOR := Color(0.353, 0.235, 0.1, 1.0)
 const BORDER_PAD := 20.0
@@ -11,9 +12,13 @@ const BORDER_TOP_EXTRA := 65.0
 
 var _space_nodes: Dictionary = {}   # space_id (int) -> SpaceNode
 var _board_data: BoardData = null
+var _water_ids: Dictionary = {}     # set of water space IDs
 
 func _ready() -> void:
 	_board_data = load("res://resources/data/board.tres")
+	for space in _board_data.spaces:
+		if space.is_water:
+			_water_ids[space.id] = true
 	_spawn_spaces(_board_data)
 	GameManager.turn_changed.connect(_on_turn_changed)
 	GameManager.player_moved.connect(_on_player_moved)
@@ -31,7 +36,8 @@ func _draw() -> void:
 			if neighbor_id <= space_data.id or not neighbor_id in _space_nodes:
 				continue
 			var to: Vector2 = (_space_nodes[neighbor_id] as SpaceNode).position + SpaceNode.SIZE / 2
-			draw_line(from, to, CONNECTION_COLOR, CONNECTION_WIDTH, true)
+			var is_water_conn := _water_ids.has(space_data.id) or _water_ids.has(neighbor_id)
+			draw_line(from, to, WATER_CONNECTION_COLOR if is_water_conn else CONNECTION_COLOR, CONNECTION_WIDTH, true)
 
 func _draw_board_border() -> void:
 	if _space_nodes.is_empty():

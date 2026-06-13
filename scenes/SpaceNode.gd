@@ -4,9 +4,12 @@ extends Area2D
 signal clicked(space_id: int)
 
 const SIZE := Vector2(100, 80)
-const NORMAL_BG := Color(0.831, 0.663, 0.416, 1)
-const LEGAL_BG  := Color(0.976, 0.918, 0.706, 1)
-const BORDER    := Color(0.353, 0.235, 0.1, 1)
+const NORMAL_BG    := Color(0.831, 0.663, 0.416, 1)
+const LEGAL_BG     := Color(0.976, 0.918, 0.706, 1)
+const BORDER       := Color(0.353, 0.235, 0.1, 1)
+const WATER_BG     := Color(0.22, 0.48, 0.78, 1)
+const WATER_LEGAL  := Color(0.50, 0.75, 0.95, 1)
+const WATER_BORDER := Color(0.10, 0.28, 0.58, 1)
 
 const ITEM_COLORS := {
     "red":    Color(0.75, 0.22, 0.17),
@@ -42,9 +45,11 @@ func _ready() -> void:
 	input_event.connect(_on_input_event)
 
 func _draw() -> void:
-	var bg := LEGAL_BG if _is_legal else NORMAL_BG
+	var water := space_data != null and space_data.is_water
+	var bg := (WATER_LEGAL if _is_legal else WATER_BG) if water else (LEGAL_BG if _is_legal else NORMAL_BG)
+	var border := WATER_BORDER if water else BORDER
 	draw_rect(Rect2(Vector2.ZERO, SIZE), bg)
-	draw_rect(Rect2(Vector2.ZERO, SIZE), BORDER, false, 2.0)
+	draw_rect(Rect2(Vector2.ZERO, SIZE), border, false, 2.0)
 	if _items.is_empty():
 		return
 	var counts := {"red": 0, "blue": 0, "yellow": 0}

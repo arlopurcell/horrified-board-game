@@ -564,7 +564,7 @@ func _logic_the_meeting(summary: Array[String]) -> void:
 	GameManager.check_frankenstein_meeting()
 
 
-func _nearest_target_space(from_id: int) -> int:
+func _nearest_target_space(from_id: int, allow_water: bool = false) -> int:
 	if GameManager.board_data == null:
 		return -1
 	var target_spaces: Dictionary = {}
@@ -586,6 +586,8 @@ func _nearest_target_space(from_id: int) -> int:
 		if space == null:
 			continue
 		for neighbor_id: int in space.neighbors:
+			if not allow_water and GameManager._is_water(neighbor_id):
+				continue
 			if target_spaces.has(neighbor_id):
 				return neighbor_id
 			if not visited.has(neighbor_id):
@@ -594,7 +596,7 @@ func _nearest_target_space(from_id: int) -> int:
 	return -1
 
 
-func _bfs_path(from_id: int, to_id: int) -> Array[int]:
+func _bfs_path(from_id: int, to_id: int, allow_water: bool = false) -> Array[int]:
 	if from_id == to_id:
 		return [from_id]
 	if GameManager.board_data == null:
@@ -608,6 +610,8 @@ func _bfs_path(from_id: int, to_id: int) -> Array[int]:
 		if space == null:
 			continue
 		for neighbor_id: int in space.neighbors:
+			if not allow_water and GameManager._is_water(neighbor_id):
+				continue
 			if visited.has(neighbor_id):
 				continue
 			visited[neighbor_id] = true

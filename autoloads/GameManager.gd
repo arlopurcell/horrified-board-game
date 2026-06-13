@@ -185,7 +185,13 @@ func teleport_player(player_index: int, space_id: int) -> void:
 	players[player_index].current_space_id = space_id
 	player_moved.emit(player_index, space_id)
 
-func get_spaces_reachable(from_id: int, max_steps: int) -> Array[int]:
+func _is_water(space_id: int) -> bool:
+	if board_data == null:
+		return false
+	var space := board_data.get_space(space_id)
+	return space != null and space.is_water
+
+func get_spaces_reachable(from_id: int, max_steps: int, allow_water: bool = false) -> Array[int]:
 	if board_data == null:
 		return []
 	var visited: Dictionary = {from_id: true}
@@ -198,6 +204,8 @@ func get_spaces_reachable(from_id: int, max_steps: int) -> Array[int]:
 				continue
 			for n: int in space.neighbors:
 				if not visited.has(n):
+					if not allow_water and _is_water(n):
+						continue
 					visited[n] = true
 					next_frontier.append(n)
 		frontier = next_frontier
@@ -330,7 +338,11 @@ func get_legal_moves() -> Array[int]:
 	if special_id == "explorer":
 		return get_all_space_ids()
 	var current_space := board_data.get_space(current_player.current_space_id)
-	var neighbors: Array[int] = current_space.neighbors.duplicate() if current_space != null else []
+	var neighbors: Array[int] = []
+	if current_space != null:
+		for n: int in current_space.neighbors:
+			if not _is_water(n):
+				neighbors.append(n)
 	match special_id:
 		"inspector":
 			for sid in get_monster_spaces():
@@ -484,7 +496,8 @@ func get_professor_targets_for_player(player_index: int) -> Array[int]:
 		return []
 	var result: Array[int] = []
 	for n: int in space.neighbors:
-		result.append(n)
+		if not _is_water(n):
+			result.append(n)
 	return result
 
 func try_professor(target_player_index: int, space_id: int) -> bool:
@@ -668,7 +681,8 @@ func get_all_space_ids() -> Array[int]:
 		return []
 	var result: Array[int] = []
 	for space in board_data.spaces:
-		result.append(space.id)
+		if not space.is_water:
+			result.append(space.id)
 	return result
 
 func try_explorer(space_id: int) -> bool:
