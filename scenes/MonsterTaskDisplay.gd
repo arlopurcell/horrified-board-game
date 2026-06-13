@@ -34,6 +34,7 @@ func _ready() -> void:
 	GameManager.monster_defeated.connect(func(_n: String): queue_redraw())
 	GameManager.wolfman_cure_complete.connect(func(_i: int): queue_redraw())
 	GameManager.mummy_changed.connect(queue_redraw)
+	GameManager.frankenstein_changed.connect(queue_redraw)
 	MonsterManager.frenzy_changed.connect(queue_redraw)
 
 func _draw() -> void:
@@ -51,6 +52,11 @@ func _draw() -> void:
 		elif m.monster_name == "Mummy":
 			_draw_mummy(font, px)
 			px += PANEL_W + PANEL_GAP
+		elif m.monster_name == "Frankenstein":
+			_draw_frankenstein_bride(font, px)
+			px += PANEL_W + PANEL_GAP
+		elif m.monster_name == "Bride":
+			continue
 		else:
 			continue
 		if frenzied:
@@ -219,6 +225,55 @@ func _input(event: InputEvent) -> void:
 			if GameManager.try_flip_mummy_token(i) or GameManager.try_slide_mummy_token(i):
 				get_viewport().set_input_as_handled()
 			return
+
+
+func _draw_frankenstein_bride(font: Font, px: float) -> void:
+	var frank: MonsterData = null
+	var bride: MonsterData = null
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Frankenstein": frank = m
+		elif m.monster_name == "Bride": bride = m
+	if frank == null:
+		return
+	var pip := 10.0
+	var pip_gap := 2.0
+	var label_w := 14.0
+	var panel_h := TITLE_H + H_PAD + ROW_H + ROW_H + H_PAD
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
+	var ta := font.get_ascent(FS_TITLE)
+	var td := font.get_descent(FS_TITLE)
+	draw_string(font, Vector2(px, PANEL_Y + TITLE_H * 0.5 + (ta - td) * 0.5),
+			"FRANKENSTEIN", HORIZONTAL_ALIGNMENT_CENTER, PANEL_W, FS_TITLE, TEXT_COL)
+	var la := font.get_ascent(FS_ROW)
+	var ld := font.get_descent(FS_ROW)
+	var ry := PANEL_Y + TITLE_H + H_PAD
+	# Frankenstein row (yellow, 0-11)
+	draw_string(font, Vector2(px + H_PAD, ry + ROW_H * 0.5 + (la - ld) * 0.5),
+			"F:", HORIZONTAL_ALIGNMENT_LEFT, -1, FS_ROW, Color(0.95, 0.77, 0.06))
+	var fx := px + H_PAD + label_w
+	for i in range(frank.dial_max):
+		var pip_x := fx + i * (pip + pip_gap)
+		var pip_y := ry + (ROW_H - pip) * 0.5
+		var filled := (i < frank.dial_value)
+		var pip_col := Color(0.95, 0.77, 0.06) if filled else Color(0.25, 0.20, 0.10)
+		draw_rect(Rect2(pip_x, pip_y, pip, pip), pip_col)
+		draw_rect(Rect2(pip_x, pip_y, pip, pip), BOX_BORDER, false, 1.0)
+	ry += ROW_H
+	# Bride row (blue, 0-8)
+	draw_string(font, Vector2(px + H_PAD, ry + ROW_H * 0.5 + (la - ld) * 0.5),
+			"B:", HORIZONTAL_ALIGNMENT_LEFT, -1, FS_ROW, Color(0.16, 0.50, 0.73))
+	var bx := px + H_PAD + label_w
+	var bride_max := bride.dial_max if bride != null else 8
+	var bride_val := bride.dial_value if bride != null else 0
+	for i in range(bride_max):
+		var pip_x := bx + i * (pip + pip_gap)
+		var pip_y := ry + (ROW_H - pip) * 0.5
+		var filled := (i < bride_val)
+		var pip_col := Color(0.16, 0.50, 0.73) if filled else Color(0.10, 0.14, 0.25)
+		draw_rect(Rect2(pip_x, pip_y, pip, pip), pip_col)
+		draw_rect(Rect2(pip_x, pip_y, pip, pip), BOX_BORDER, false, 1.0)
 
 
 func _draw_frenzy_icon(px: float) -> void:

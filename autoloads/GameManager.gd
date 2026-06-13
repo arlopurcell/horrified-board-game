@@ -48,6 +48,8 @@ var mummy_slot_contents: Array[int] = []
 var mummy_slot_revealed: Array[bool] = []
 var mummy_moves_remaining: int = 0
 var mummy_soul_player: int = -1
+var frank_pending_strength: int = 0
+var bride_pending_strength: int = 0
 
 const TERROR_MAX := 7
 
@@ -70,6 +72,7 @@ signal wolfman_cure_complete(player_index: int)
 signal wolfman_hunted_changed(player_index: int)
 signal mummy_changed
 signal mummy_soul_changed(player_index: int)
+signal frankenstein_changed
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -102,6 +105,8 @@ func start_game(player_count: int) -> void:
 	mummy_slot_revealed.clear()
 	mummy_moves_remaining = 0
 	mummy_soul_player = -1
+	frank_pending_strength = 0
+	bride_pending_strength = 0
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -851,3 +856,161 @@ func try_defeat_mummy(red_items: Array[ItemData]) -> bool:
 		game_over = true
 		game_won.emit()
 	return true
+
+
+func _get_frankenstein() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Frankenstein":
+			return m
+	return null
+
+
+func _get_bride() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Bride":
+			return m
+	return null
+
+
+func can_advance_frankenstein() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var frank := _get_frankenstein()
+	if frank == null or frank.dial_value >= frank.dial_max:
+		return false
+	if players[active_player_index].current_space_id != frank.current_space_id:
+		return false
+	return not get_advance_frankenstein_items().is_empty()
+
+
+func get_advance_frankenstein_items() -> Array[ItemData]:
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it.color == "yellow":
+			result.append(it)
+	return result
+
+
+func get_frankenstein_destinations() -> Array[int]:
+	var frank := _get_frankenstein()
+	if frank == null:
+		return [-1]
+	var reachable := get_spaces_reachable(frank.current_space_id, frank_pending_strength)
+	return ([-1] as Array[int]) + reachable
+
+
+func try_advance_frankenstein(item: ItemData) -> bool:
+	if not can_advance_frankenstein():
+		return false
+	if item.color != "yellow":
+		return false
+	var frank := _get_frankenstein()
+	if frank == null:
+		return false
+	players[active_player_index].inventory.erase(item)
+	frank.dial_value = mini(frank.dial_value + item.strength, frank.dial_max)
+	frank_pending_strength = item.strength
+	items_changed.emit()
+	frankenstein_changed.emit()
+	return true
+
+
+func move_frankenstein(space_id: int) -> void:
+	var frank := _get_frankenstein()
+	if frank == null:
+		frank_pending_strength = 0
+		return
+	if space_id >= 0:
+		frank.current_space_id = space_id
+		MonsterManager.monster_relocated.emit()
+	frank_pending_strength = 0
+	moves_remaining -= 1
+	frankenstein_changed.emit()
+	check_frankenstein_meeting()
+
+
+func can_advance_bride() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var bride := _get_bride()
+	if bride == null or bride.dial_value >= bride.dial_max:
+		return false
+	if players[active_player_index].current_space_id != bride.current_space_id:
+		return false
+	return not get_advance_bride_items().is_empty()
+
+
+func get_advance_bride_items() -> Array[ItemData]:
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it.color == "blue":
+			result.append(it)
+	return result
+
+
+func get_bride_destinations() -> Array[int]:
+	var bride := _get_bride()
+	if bride == null:
+		return [-1]
+	var reachable := get_spaces_reachable(bride.current_space_id, bride_pending_strength)
+	return ([-1] as Array[int]) + reachable
+
+
+func try_advance_bride(item: ItemData) -> bool:
+	if not can_advance_bride():
+		return false
+	if item.color != "blue":
+		return false
+	var bride := _get_bride()
+	if bride == null:
+		return false
+	players[active_player_index].inventory.erase(item)
+	bride.dial_value = mini(bride.dial_value + item.strength, bride.dial_max)
+	bride_pending_strength = item.strength
+	items_changed.emit()
+	frankenstein_changed.emit()
+	return true
+
+
+func move_bride(space_id: int) -> void:
+	var bride := _get_bride()
+	if bride == null:
+		bride_pending_strength = 0
+		return
+	if space_id >= 0:
+		bride.current_space_id = space_id
+		MonsterManager.monster_relocated.emit()
+	bride_pending_strength = 0
+	moves_remaining -= 1
+	frankenstein_changed.emit()
+	check_frankenstein_meeting()
+
+
+func check_frankenstein_meeting() -> void:
+	var frank := _get_frankenstein()
+	var bride := _get_bride()
+	if frank == null or bride == null:
+		return
+	if frank.current_space_id != bride.current_space_id:
+		return
+	if frank.dial_value >= frank.dial_max and bride.dial_value >= bride.dial_max:
+		monster_defeated.emit("Frankenstein")
+		monster_defeated.emit("Bride")
+		MonsterManager.remove_monster("Frankenstein")
+		MonsterManager.remove_monster("Bride")
+		frankenstein_changed.emit()
+		if MonsterManager.monsters.is_empty():
+			game_over = true
+			game_won.emit()
+	else:
+		terror_level += 1
+		terror_changed.emit(terror_level)
+		frank.current_space_id = frank.starting_space_id
+		bride.current_space_id = bride.starting_space_id
+		MonsterManager.monster_relocated.emit()
+		frankenstein_changed.emit()
+		if terror_level >= TERROR_MAX:
+			game_over = true
+			game_lost.emit()

@@ -153,6 +153,24 @@ text = "DEFEAT MUMMY"
 theme_override_font_sizes/font_size = 13
 visible = false
 
+[node name="AdvanceFrankensteinButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 530.0
+offset_right = 250.0
+offset_bottom = 570.0
+text = "ADVANCE FRANKENSTEIN"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="AdvanceBrideButton" type="Button" parent="."]
+offset_left = 10.0
+offset_top = 575.0
+offset_right = 250.0
+offset_bottom = 615.0
+text = "ADVANCE BRIDE"
+theme_override_font_sizes/font_size = 13
+visible = false
+
 [node name="SpecialButton" type="Button" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0

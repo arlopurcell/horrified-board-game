@@ -26,6 +26,7 @@ func setup(monster_list: Array[MonsterData], deck_data: MonsterDeckData) -> void
 	discard_pile.clear()
 	for monster in monsters:
 		monster.current_space_id = monster.starting_space_id
+		monster.dial_value = 0
 	frenzied_monster_name = ""
 	_update_frenzied_monster()
 	GameManager.setup_mummy_puzzle()
@@ -35,6 +36,8 @@ func _update_frenzied_monster() -> void:
 	var lowest := 999999
 	var name := ""
 	for m in monsters:
+		if m.monster_name == "Bride":
+			continue
 		if m.frenzy_number < lowest:
 			lowest = m.frenzy_number
 			name = m.monster_name
@@ -158,6 +161,7 @@ func run_phase() -> void:
 				hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + hits
 	monsters_moved.emit(move_data)
 	await phase_animation_done
+	GameManager.check_frankenstein_meeting()
 	if not attack_dice.is_empty():
 		dice_rolled.emit(attack_dice)
 		await dice_animation_done
@@ -197,6 +201,8 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_on_the_move(summary)
 		"Reincarnated Soul":
 			_logic_reincarnated_soul(summary)
+		"The Meeting":
+			_logic_the_meeting(summary)
 		"The Innocent":
 			_logic_the_innocent(summary)
 		"Former Employer":
@@ -424,8 +430,12 @@ func _logic_the_ichthyologist(summary: Array[String]) -> void:
 
 
 func _logic_on_the_move(summary: Array[String]) -> void:
-	if monsters.size() > 1:
-		var sorted := monsters.duplicate()
+	var eligible: Array[MonsterData] = []
+	for m in monsters:
+		if m.monster_name != "Bride":
+			eligible.append(m)
+	if eligible.size() > 1:
+		var sorted := eligible.duplicate()
 		sorted.sort_custom(func(a: MonsterData, b: MonsterData) -> bool:
 			return a.frenzy_number < b.frenzy_number)
 		var current_idx := 0
@@ -437,7 +447,7 @@ func _logic_on_the_move(summary: Array[String]) -> void:
 		frenzied_monster_name = next_name
 		frenzy_changed.emit()
 		summary.append("Frenzy marker moved to " + frenzied_monster_name)
-	elif monsters.size() == 1:
+	elif eligible.size() == 1:
 		summary.append("Frenzy marker stays on " + frenzied_monster_name)
 	if GameManager.board_data == null:
 		return
@@ -529,6 +539,31 @@ func _logic_reincarnated_soul(summary: Array[String]) -> void:
 	summary.append(soul_player.display_name + " drawn " + str(steps) + " step(s) toward the Mummy, now at " + dest_name)
 
 
+func _logic_the_meeting(summary: Array[String]) -> void:
+	var frank: MonsterData = null
+	var bride: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Frankenstein": frank = m
+		elif m.monster_name == "Bride": bride = m
+	if frank == null or bride == null:
+		return
+	if bride.current_space_id == frank.current_space_id:
+		summary.append("The Bride is already with Frankenstein")
+		GameManager.check_frankenstein_meeting()
+		return
+	var path := _bfs_path(bride.current_space_id, frank.current_space_id)
+	if path.size() < 2:
+		summary.append("The Bride cannot reach Frankenstein")
+		return
+	var steps := mini(2, path.size() - 1)
+	bride.current_space_id = path[steps]
+	monster_relocated.emit()
+	var dest_space := GameManager.board_data.get_space(bride.current_space_id)
+	var dest_name := dest_space.name if dest_space != null else str(bride.current_space_id)
+	summary.append("The Bride moved " + str(steps) + " step(s) toward Frankenstein, now at " + dest_name)
+	GameManager.check_frankenstein_meeting()
+
+
 func _nearest_target_space(from_id: int) -> int:
 	if GameManager.board_data == null:
 		return -1
@@ -610,6 +645,8 @@ func _trigger_power(monster: MonsterData) -> String:
 			return _power_wolfman(monster)
 		"Mummy":
 			return _power_mummy(monster)
+		"Frankenstein", "Bride":
+			return _power_frankenstein_or_bride()
 	return ""
 
 
@@ -632,6 +669,27 @@ func _power_mummy(_mummy: MonsterData) -> String:
 	GameManager.mummy_slot_revealed[min_idx] = false
 	GameManager.mummy_changed.emit()
 	return "scarab token " + str(min_token) + " flipped face-down"
+
+
+func _power_frankenstein_or_bride() -> String:
+	var frank: MonsterData = null
+	var bride: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Frankenstein": frank = m
+		elif m.monster_name == "Bride": bride = m
+	if frank == null or bride == null:
+		return "power: one of the pair is missing"
+	if frank.current_space_id == bride.current_space_id:
+		return "Bride is already with Frankenstein"
+	var path := _bfs_path(bride.current_space_id, frank.current_space_id)
+	if path.size() < 2:
+		return "Bride cannot reach Frankenstein"
+	bride.current_space_id = path[1]
+	monster_relocated.emit()
+	GameManager.check_frankenstein_meeting()
+	var dest_space := GameManager.board_data.get_space(bride.current_space_id)
+	var dest_name := dest_space.name if dest_space != null else str(bride.current_space_id)
+	return "Bride moved 1 step toward Frankenstein, now at " + dest_name
 
 
 func _power_dracula(dracula: MonsterData) -> String:

@@ -4,6 +4,7 @@ const AVAILABLE_MONSTERS: Dictionary = {
     "Dracula": "res://resources/data/dracula.tres",
     "Wolfman": "res://resources/data/wolfman.tres",
     "Mummy": "res://resources/data/mummy.tres",
+    "Frankenstein": ["res://resources/data/frankenstein.tres", "res://resources/data/bride.tres"],
 }
 
 var _selected_player_count := 0
@@ -180,5 +181,10 @@ func _start_game() -> void:
     GameManager.pending_monster_paths.clear()
     for name in _selected_monsters:
         if _selected_monsters[name]:
-            GameManager.pending_monster_paths.append(AVAILABLE_MONSTERS[name])
+            var entry = AVAILABLE_MONSTERS[name]
+            if entry is Array:
+                for path in entry:
+                    GameManager.pending_monster_paths.append(path)
+            else:
+                GameManager.pending_monster_paths.append(entry)
     get_tree().change_scene_to_file("res://scenes/Main.tscn")
