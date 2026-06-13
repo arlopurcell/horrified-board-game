@@ -23,10 +23,13 @@ func _on_player_moved(player_index: int, _space_id: int) -> void:
 		return
 	if _move_tween and _move_tween.is_running():
 		_move_tween.kill()
+	_sync_token_visibility()
 	var positions := _compute_positions()
 	for i in range(_tokens.size()):
 		if i != player_index:
 			_tokens[i].position = positions[i]
+	if GameManager.players[player_index].current_space_id == -1:
+		return
 	_move_tween = _tokens[player_index].move_to(positions[player_index])
 	await _move_tween.finished
 
@@ -37,9 +40,14 @@ func _place_all_tokens() -> void:
 	if GameManager.players.size() != _tokens.size():
 		push_error("Players.gd: token/player count mismatch")
 		return
+	_sync_token_visibility()
 	var positions := _compute_positions()
 	for i in range(_tokens.size()):
 		_tokens[i].position = positions[i]
+
+func _sync_token_visibility() -> void:
+	for i in range(_tokens.size()):
+		_tokens[i].visible = GameManager.players[i].current_space_id != -1
 
 func _compute_positions() -> Array[Vector2]:
 	var positions: Array[Vector2] = []
@@ -47,6 +55,8 @@ func _compute_positions() -> Array[Vector2]:
 	var by_space: Dictionary = {}
 	for i in range(GameManager.players.size()):
 		var sid := GameManager.players[i].current_space_id
+		if sid == -1:
+			continue
 		if sid not in by_space:
 			by_space[sid] = []
 		by_space[sid].append(i)

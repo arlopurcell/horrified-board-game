@@ -195,24 +195,26 @@ func get_spaces_reachable(from_id: int, max_steps: int, allow_water: bool = fals
 	if board_data == null:
 		return []
 	var visited: Dictionary = {from_id: true}
+	var result: Array[int] = []
 	var frontier: Array[int] = [from_id]
 	for _step in range(max_steps):
 		var next_frontier: Array[int] = []
-		for sid: int in frontier:
-			var space := board_data.get_space(sid)
+		for sid in frontier:
+			var space := board_data.get_space(sid as int)
 			if space == null:
 				continue
-			for n: int in space.neighbors:
-				if not visited.has(n):
-					if not allow_water and _is_water(n):
-						continue
-					visited[n] = true
-					next_frontier.append(n)
+			for neighbor in space.neighbors:
+				var n: int = neighbor as int
+				if visited.has(n):
+					continue
+				if not allow_water and _is_water(n):
+					continue
+				visited[n] = true
+				next_frontier.append(n)
+				result.append(n)
+		if next_frontier.is_empty():
+			break
 		frontier = next_frontier
-	var result: Array[int] = []
-	for k in visited:
-		if k != from_id:
-			result.append(k as int)
 	return result
 
 func try_move(space_id: int) -> bool:
@@ -911,7 +913,9 @@ func get_frankenstein_destinations() -> Array[int]:
 	if frank == null:
 		return [-1]
 	var reachable := get_spaces_reachable(frank.current_space_id, frank_pending_strength)
-	return ([-1] as Array[int]) + reachable
+	var destinations: Array[int] = [-1]
+	destinations.append_array(reachable)
+	return destinations
 
 
 func try_advance_frankenstein(item: ItemData) -> bool:
@@ -969,7 +973,9 @@ func get_bride_destinations() -> Array[int]:
 	if bride == null:
 		return [-1]
 	var reachable := get_spaces_reachable(bride.current_space_id, bride_pending_strength)
-	return ([-1] as Array[int]) + reachable
+	var destinations: Array[int] = [-1]
+	destinations.append_array(reachable)
+	return destinations
 
 
 func try_advance_bride(item: ItemData) -> bool:

@@ -176,7 +176,7 @@ is_water = true
 script = ExtResource("2")
 id = 24
 name = "River"
-position = Vector2(695, 325)
+position = Vector2(640, 390)
 neighbors = [6, 17]
 is_water = true
 

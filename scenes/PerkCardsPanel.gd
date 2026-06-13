@@ -9,7 +9,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(PRESET_BOTTOM_WIDE)
 	offset_top = -195.0
 	offset_bottom = -70.0
-	offset_left = 20.0
+	offset_left = 270.0
 	offset_right = -20.0
 	mouse_filter = MOUSE_FILTER_PASS
 

@@ -87,78 +87,17 @@ func run_phase() -> void:
 	_run_card_logic(card, summary_parts)
 	await get_tree().create_timer(1.0).timeout
 	var move_data: Array = []
+	var power_move_data: Array = []
 	var attack_dice: Array = []
 	var hit_spaces: Dictionary = {}   # space_id -> int
+	# Pass 1: named monsters (skip Frenzy entry)
 	for monster_name: String in card.monster_names:
-		var resolved_name := monster_name
-		if resolved_name == "Frenzy":
-			if frenzied_monster_name == "":
-				continue
-			resolved_name = frenzied_monster_name
-		var monster: MonsterData = null
-		for m in monsters:
-			if m.monster_name == resolved_name:
-				monster = m
-				break
+		if monster_name == "Frenzy":
+			continue
+		var monster := _find_monster(monster_name)
 		if monster == null:
 			continue
-		var target_space := _nearest_target_space(monster.current_space_id)
-		if target_space == -1:
-			summary_parts.append(monster.monster_name + " didn't move")
-			continue
-		var path := _bfs_path(monster.current_space_id, target_space)
-		var destination: int
-		if path.is_empty():
-			destination = monster.current_space_id
-		else:
-			var dest_idx := mini(card.move_steps, path.size() - 1)
-			destination = path[dest_idx]
-			if dest_idx > 0:
-				move_data.append({
-					"monster_idx": monsters.find(monster),
-					"path": path.slice(0, dest_idx + 1)
-				})
-		monster.current_space_id = destination
-		var dest_space := GameManager.board_data.get_space(destination)
-		var dest_name := dest_space.name if dest_space != null else str(destination)
-		var targets_here := false
-		for p in GameManager.players:
-			if p.current_space_id == destination:
-				targets_here = true
-				break
-		if not targets_here:
-			for v in VillagerManager.villagers:
-				if (v as VillagerData).current_space_id == destination:
-					targets_here = true
-					break
-		if not targets_here:
-			summary_parts.append(monster.monster_name + " moved to " + dest_name)
-		else:  # targets_here
-			var dice_results := _roll_dice(card.attack_dice)
-			attack_dice.append_array(dice_results)
-			var hits := dice_results.count("hit")
-			var power_triggered := dice_results.has("power")
-			var die_word := "die" if card.attack_dice == 1 else "dice"
-			var hit_word := "hit" if hits == 1 else "hits"
-			var atk_text := monster.monster_name + " moved to " + dest_name + \
-				", rolled " + str(card.attack_dice) + " " + die_word + \
-				" → " + str(hits) + " " + hit_word
-			if power_triggered:
-				var power_note := _trigger_power(monster)
-				atk_text += " [POWER: " + power_note + "]"
-				if monster.monster_name == "Wolfman":
-					var extra := 0
-					for p in GameManager.players:
-						if p.current_space_id == destination:
-							extra += 1
-					for v in VillagerManager.villagers:
-						if (v as VillagerData).current_space_id == destination:
-							extra += 1
-					if extra > 0:
-						hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + extra
-			summary_parts.append(atk_text)
-			if hits > 0:
-				hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + hits
+		_process_monster_for_card(monster, card, move_data, power_move_data, attack_dice, hit_spaces, summary_parts)
 	monsters_moved.emit(move_data)
 	await phase_animation_done
 	GameManager.check_frankenstein_meeting()
@@ -170,7 +109,105 @@ func run_phase() -> void:
 			break
 		space_attacked.emit(space_id as int, hit_spaces[space_id] as int)
 		await hit_resolved
+	if not power_move_data.is_empty():
+		monsters_moved.emit(power_move_data)
+		await phase_animation_done
+		GameManager.check_frankenstein_meeting()
+
+	# Pass 2: Frenzy monster (separate move+attack cycle so first kill doesn't block second)
+	if card.monster_names.has("Frenzy") and frenzied_monster_name != "" and not GameManager.game_over:
+		var frenzy_monster := _find_monster(frenzied_monster_name)
+		if frenzy_monster != null:
+			var frenzy_move: Array = []
+			var frenzy_power_move: Array = []
+			var frenzy_dice: Array = []
+			var frenzy_hits: Dictionary = {}
+			_process_monster_for_card(frenzy_monster, card, frenzy_move, frenzy_power_move, frenzy_dice, frenzy_hits, summary_parts)
+			monsters_moved.emit(frenzy_move)
+			await phase_animation_done
+			GameManager.check_frankenstein_meeting()
+			if not frenzy_dice.is_empty():
+				dice_rolled.emit(frenzy_dice)
+				await dice_animation_done
+			for space_id in frenzy_hits:
+				if GameManager.game_over:
+					break
+				space_attacked.emit(space_id as int, frenzy_hits[space_id] as int)
+				await hit_resolved
+			if not frenzy_power_move.is_empty():
+				monsters_moved.emit(frenzy_power_move)
+				await phase_animation_done
+				GameManager.check_frankenstein_meeting()
+
 	phase_completed.emit(" | ".join(summary_parts))
+
+
+func _find_monster(monster_name: String) -> MonsterData:
+	for m in monsters:
+		if m.monster_name == monster_name:
+			return m
+	return null
+
+
+func _process_monster_for_card(monster: MonsterData, card: MonsterCardData,
+		move_data: Array, power_move_data: Array, attack_dice: Array, hit_spaces: Dictionary, summary_parts: Array) -> void:
+	var target_space := _nearest_target_space(monster.current_space_id)
+	if target_space == -1:
+		summary_parts.append(monster.monster_name + " didn't move")
+		return
+	var path := _bfs_path(monster.current_space_id, target_space)
+	var destination: int
+	if path.is_empty():
+		destination = monster.current_space_id
+	else:
+		var dest_idx := mini(card.move_steps, path.size() - 1)
+		destination = path[dest_idx]
+		if dest_idx > 0:
+			move_data.append({
+				"monster_idx": monsters.find(monster),
+				"path": path.slice(0, dest_idx + 1)
+			})
+	monster.current_space_id = destination
+	var dest_space := GameManager.board_data.get_space(destination)
+	var dest_name := dest_space.name if dest_space != null else str(destination)
+	var targets_here := false
+	for p in GameManager.players:
+		if p.current_space_id == destination:
+			targets_here = true
+			break
+	if not targets_here:
+		for v in VillagerManager.villagers:
+			if (v as VillagerData).current_space_id == destination:
+				targets_here = true
+				break
+	if not targets_here:
+		summary_parts.append(monster.monster_name + " moved to " + dest_name)
+		return
+	var dice_results := _roll_dice(card.attack_dice)
+	attack_dice.append_array(dice_results)
+	var hits := dice_results.count("hit")
+	var power_triggered := dice_results.has("power")
+	var die_word := "die" if card.attack_dice == 1 else "dice"
+	var hit_word := "hit" if hits == 1 else "hits"
+	var atk_text := monster.monster_name + " moved to " + dest_name + \
+		", rolled " + str(card.attack_dice) + " " + die_word + \
+		" → " + str(hits) + " " + hit_word
+	if power_triggered:
+		var power_note := _trigger_power(monster, power_move_data)
+		atk_text += " [POWER: " + power_note + "]"
+		if monster.monster_name == "Wolfman":
+			var extra := 0
+			for p in GameManager.players:
+				if p.current_space_id == destination:
+					extra += 1
+			for v in VillagerManager.villagers:
+				if (v as VillagerData).current_space_id == destination:
+					extra += 1
+			if extra > 0:
+				hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + extra
+	summary_parts.append(atk_text)
+	if hits > 0:
+		hit_spaces[destination] = (hit_spaces.get(destination, 0) as int) + hits
 
 
 func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
@@ -641,7 +678,7 @@ func _roll_dice(count: int) -> Array[String]:
 	return results
 
 
-func _trigger_power(monster: MonsterData) -> String:
+func _trigger_power(monster: MonsterData, power_move_data: Array) -> String:
 	match monster.monster_name:
 		"Dracula":
 			return _power_dracula(monster)
@@ -650,7 +687,7 @@ func _trigger_power(monster: MonsterData) -> String:
 		"Mummy":
 			return _power_mummy(monster)
 		"Frankenstein", "Bride":
-			return _power_frankenstein_or_bride()
+			return _power_frankenstein_or_bride(power_move_data)
 	return ""
 
 
@@ -675,7 +712,7 @@ func _power_mummy(_mummy: MonsterData) -> String:
 	return "scarab token " + str(min_token) + " flipped face-down"
 
 
-func _power_frankenstein_or_bride() -> String:
+func _power_frankenstein_or_bride(power_move_data: Array) -> String:
 	var frank: MonsterData = null
 	var bride: MonsterData = null
 	for m in monsters:
@@ -688,9 +725,12 @@ func _power_frankenstein_or_bride() -> String:
 	var path := _bfs_path(bride.current_space_id, frank.current_space_id)
 	if path.size() < 2:
 		return "Bride cannot reach Frankenstein"
+	var from_id := bride.current_space_id
 	bride.current_space_id = path[1]
-	monster_relocated.emit()
-	GameManager.check_frankenstein_meeting()
+	power_move_data.append({
+		"monster_idx": monsters.find(bride),
+		"path": [from_id, path[1]]
+	})
 	var dest_space := GameManager.board_data.get_space(bride.current_space_id)
 	var dest_name := dest_space.name if dest_space != null else str(bride.current_space_id)
 	return "Bride moved 1 step toward Frankenstein, now at " + dest_name
