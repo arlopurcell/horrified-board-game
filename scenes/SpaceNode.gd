@@ -3,7 +3,7 @@ extends Area2D
 
 signal clicked(space_id: int)
 
-const SIZE := Vector2(100, 80)
+const SIZE := Vector2(120, 96)
 const NORMAL_BG    := Color(0.831, 0.663, 0.416, 1)
 const LEGAL_BG     := Color(0.976, 0.918, 0.706, 1)
 const BORDER       := Color(0.353, 0.235, 0.1, 1)
@@ -52,31 +52,27 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SIZE), border, false, 2.0)
 	if _items.is_empty():
 		return
-	var counts := {"red": 0, "blue": 0, "yellow": 0}
+	var font := ThemeDB.fallback_font
+	const R := 11.0
+	const FS := 10
+	const GAP := 4.0
+	var n := _items.size()
+	var total_w := n * R * 2.0 + (n - 1) * GAP
+	var cx := (SIZE.x - total_w) / 2.0 + R
+	var cy := SIZE.y - R - 5.0
+	var la := font.get_ascent(FS)
+	var ld := font.get_descent(FS)
 	for item in _items:
 		var item_data := item as ItemData
-		if item_data != null and counts.has(item_data.color):
-			counts[item_data.color] += 1
-	var present: Array = []
-	for c in ["red", "blue", "yellow"]:
-		if counts[c] > 0:
-			present.append(c)
-	if present.is_empty():
-		return
-	var bar_w := 20.0
-	var bar_h := 8.0
-	var gap := 3.0
-	var total_w := present.size() * bar_w + (present.size() - 1) * gap
-	var x := (SIZE.x - total_w) / 2.0
-	var bar_y := SIZE.y - bar_h - 4.0
-	var font := ThemeDB.fallback_font
-	for c in present:
-		var col: Color = ITEM_COLORS[c]
-		draw_rect(Rect2(x, bar_y, bar_w, bar_h), col)
-		draw_rect(Rect2(x, bar_y, bar_w, bar_h), BORDER, false, 1.0)
-		draw_string(font, Vector2(x + bar_w / 2.0, bar_y - 1.0), str(counts[c]),
-				HORIZONTAL_ALIGNMENT_CENTER, bar_w, 9, BORDER)
-		x += bar_w + gap
+		if item_data == null:
+			cx += R * 2.0 + GAP
+			continue
+		var col: Color = ITEM_COLORS.get(item_data.color, Color(0.5, 0.5, 0.5))
+		draw_circle(Vector2(cx, cy), R, col)
+		draw_arc(Vector2(cx, cy), R, 0, TAU, 24, BORDER, 1.5)
+		draw_string(font, Vector2(cx - R, cy + (la - ld) * 0.5),
+				str(item_data.strength), HORIZONTAL_ALIGNMENT_CENTER, R * 2.0, FS, Color.WHITE)
+		cx += R * 2.0 + GAP
 
 func _on_input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
