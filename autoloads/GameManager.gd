@@ -1130,3 +1130,46 @@ func try_defeat_creature(items: Array[ItemData]) -> bool:
 		game_over = true
 		game_won.emit()
 	return true
+
+
+func can_trade_items() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var my_space := players[active_player_index].current_space_id
+	if my_space < 0:
+		return false
+	for i in range(players.size()):
+		if i != active_player_index and players[i].current_space_id == my_space:
+			return true
+	return false
+
+
+func get_trade_partners() -> Array[int]:
+	var partners: Array[int] = []
+	var my_space := players[active_player_index].current_space_id
+	for i in range(players.size()):
+		if i != active_player_index and players[i].current_space_id == my_space:
+			partners.append(i)
+	return partners
+
+
+func try_trade_items(partner_index: int, give_items: Array[ItemData], take_items: Array[ItemData]) -> bool:
+	if moves_remaining <= 0:
+		return false
+	var me := players[active_player_index]
+	var partner := players[partner_index]
+	for item in give_items:
+		if not me.inventory.has(item):
+			return false
+	for item in take_items:
+		if not partner.inventory.has(item):
+			return false
+	for item in give_items:
+		me.inventory.erase(item)
+		partner.inventory.append(item)
+	for item in take_items:
+		partner.inventory.erase(item)
+		me.inventory.append(item)
+	moves_remaining -= 1
+	items_changed.emit()
+	return true

@@ -22,6 +22,7 @@ extends CanvasLayer
 @onready var advance_bride_button: Button = $AdvanceBrideButton
 @onready var advance_creature_button: Button = $AdvanceCreatureButton
 @onready var defeat_creature_button: Button = $DefeatCreatureButton
+@onready var trade_button: Button = $TradeButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
 const ItemSelectionPanelScene := preload("res://scenes/ItemSelectionPanel.gd")
@@ -42,6 +43,8 @@ var _hit_target_villager: VillagerData = null
 var _bring_along_queue: Array = []
 var _bring_along_destination: int = -1
 var _mv_villager: VillagerData = null
+var _trade_partner_index: int = -1
+var _trade_give_items: Array[ItemData] = []
 
 func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -58,6 +61,7 @@ func _ready() -> void:
 	advance_bride_button.pressed.connect(_on_advance_bride_pressed)
 	advance_creature_button.pressed.connect(_on_advance_creature_pressed)
 	defeat_creature_button.pressed.connect(_on_defeat_creature_pressed)
+	trade_button.pressed.connect(_on_trade_pressed)
 	GameManager.frankenstein_changed.connect(_on_frankenstein_changed)
 	GameManager.creature_changed.connect(_on_creature_changed)
 	GameManager.wolfman_cure_complete.connect(_on_wolfman_cure_complete)
@@ -153,6 +157,12 @@ func _on_special_selected(choice_idx: int) -> void:
 		_pending_action = ""
 		_process_bring_along_queue()
 		return
+	if _pending_action == "trade_partner":
+		_trade_partner_index = _special_targets[choice_idx] as int
+		_special_targets = []
+		_pending_action = ""
+		_start_trade_give()
+		return
 	if _pending_action == "mv_who":
 		_mv_villager = _special_targets[choice_idx] as VillagerData
 		_special_targets = []
@@ -245,6 +255,11 @@ func _on_special_cancelled() -> void:
 		_bring_along_queue.pop_front()
 		_pending_action = ""
 		_process_bring_along_queue()
+		return
+	if _pending_action == "trade_partner":
+		_trade_partner_index = -1
+		_special_targets = []
+		_pending_action = ""
 		return
 	if _pending_action == "mv_who" or _pending_action == "mv_where":
 		_mv_villager = null
@@ -340,6 +355,14 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 			GameManager.try_advance_creature(selected_items[0])
 	elif _pending_action == "defeat_creature":
 		GameManager.try_defeat_creature(selected_items)
+	elif _pending_action == "trade_give":
+		_trade_give_items = selected_items.duplicate()
+		_start_trade_take()
+		return
+	elif _pending_action == "trade_take":
+		GameManager.try_trade_items(_trade_partner_index, _trade_give_items, selected_items)
+		_trade_partner_index = -1
+		_trade_give_items.clear()
 	elif _pending_action == "advance":
 		GameManager.try_advance(selected_items)
 	elif _pending_action == "defeat":
@@ -364,6 +387,11 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 func _on_item_panel_cancelled() -> void:
 	if _pending_action == "hit_item":
 		_apply_hit_death()
+		return
+	if _pending_action == "trade_give" or _pending_action == "trade_take":
+		_trade_partner_index = -1
+		_trade_give_items.clear()
+		_pending_action = ""
 		return
 	if _pending_action == "perk_delivery":
 		_pending_perk_card = null
@@ -579,6 +607,41 @@ func _on_defeat_creature_pressed() -> void:
 func _on_creature_changed() -> void:
 	_refresh_action_buttons()
 
+
+func _on_trade_pressed() -> void:
+	var partners := GameManager.get_trade_partners()
+	if partners.is_empty():
+		return
+	if partners.size() == 1:
+		_trade_partner_index = partners[0]
+		_start_trade_give()
+	else:
+		_special_targets = partners
+		_pending_action = "trade_partner"
+		_special_panel.open("Trade with which player?", _player_indices_to_labels(partners))
+
+
+func _start_trade_give() -> void:
+	var active := GameManager.get_active_player()
+	if active == null:
+		return
+	var items: Array[ItemData] = []
+	for item in active.inventory:
+		items.append(item as ItemData)
+	_pending_action = "trade_give"
+	var partner_name := GameManager.players[_trade_partner_index].display_name
+	_item_panel.open(items, 0, 0, "Give items to " + partner_name + " (select any, or none)", [], true, "Select Items")
+
+
+func _start_trade_take() -> void:
+	var partner := GameManager.players[_trade_partner_index]
+	var items: Array[ItemData] = []
+	for item in partner.inventory:
+		items.append(item as ItemData)
+	_pending_action = "trade_take"
+	_item_panel.open(items, 0, 0, "Take items from " + partner.display_name + " (select any, or none)", [], true, "Select Items")
+
+
 func _start_move_villager() -> void:
 	var active_space := GameManager.players[GameManager.active_player_index].current_space_id
 	var all_villagers: Array = []
@@ -625,6 +688,7 @@ func _refresh_action_buttons() -> void:
 	advance_bride_button.visible = GameManager.can_advance_bride()
 	advance_creature_button.visible = GameManager.can_advance_creature()
 	defeat_creature_button.visible = GameManager.can_defeat_creature()
+	trade_button.visible = GameManager.can_trade_items()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
 		match active.character.special_id:

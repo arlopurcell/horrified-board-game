@@ -12,6 +12,8 @@ var _strength_boost: int = 0
 var _required_strength: int = REQUIRED_STRENGTH
 var _custom_message: String = ""
 var _required_colors: Array[String] = []
+var _allow_empty: bool = false
+var _title_label: Label
 var _total_label: Label
 var _confirm_btn: Button
 var _item_list: VBoxContainer
@@ -30,11 +32,11 @@ func _ready() -> void:
 	var vbox := VBoxContainer.new()
 	add_child(vbox)
 
-	var title := Label.new()
-	title.text = "Select Items to Discard"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(title)
+	_title_label = Label.new()
+	_title_label.text = "Select Items to Discard"
+	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title_label.add_theme_font_size_override("font_size", 16)
+	vbox.add_child(_title_label)
 
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(380, 250)
@@ -65,12 +67,14 @@ func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirmed)
 	btn_row.add_child(_confirm_btn)
 
-func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "", required_colors: Array[String] = []) -> void:
+func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "", required_colors: Array[String] = [], allow_empty: bool = false, title: String = "Select Items to Discard") -> void:
 	_items = items
 	_strength_boost = strength_boost
 	_required_strength = required_strength
 	_custom_message = custom_message
 	_required_colors = required_colors.duplicate()
+	_allow_empty = allow_empty
+	_title_label.text = title
 	_checkboxes.clear()
 	for child in _item_list.get_children():
 		child.queue_free()
@@ -121,7 +125,7 @@ func _update_total() -> void:
 		_confirm_btn.disabled = not all_present
 	elif _required_strength <= 0:
 		_total_label.text = _custom_message if _custom_message != "" else "Select any item to block the hit"
-		_confirm_btn.disabled = count == 0
+		_confirm_btn.disabled = count == 0 and not _allow_empty
 	else:
 		_total_label.text = "Total strength: %d / %d required" % [total, _required_strength]
 		_confirm_btn.disabled = total < _required_strength
