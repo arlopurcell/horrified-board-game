@@ -51,8 +51,10 @@ var mummy_soul_player: int = -1
 var frank_pending_strength: int = 0
 var bride_pending_strength: int = 0
 var creature_path_index: int = 0
+var invisible_man_slots: Array = []  # 5 elements: null or ItemData
 
 const CREATURE_PATH: Array[String] = ["red","yellow","blue","red","blue","yellow","red","blue","yellow","blue","yellow","red","blue","red","yellow","blue","yellow","red","blue"]
+const INVISIBLE_MAN_SLOT_NAMES: Array[String] = ["Inn", "Barn", "Mansion", "Laboratory", "Institute"]
 
 const TERROR_MAX := 7
 
@@ -77,6 +79,7 @@ signal mummy_changed
 signal mummy_soul_changed(player_index: int)
 signal frankenstein_changed
 signal creature_changed
+signal invisible_man_changed
 
 func start_game(player_count: int) -> void:
 	player_count = clampi(player_count, 1, 5)
@@ -112,6 +115,7 @@ func start_game(player_count: int) -> void:
 	frank_pending_strength = 0
 	bride_pending_strength = 0
 	creature_path_index = 0
+	invisible_man_slots = [null, null, null, null, null]
 	dracula_coffins.clear()
 	for space in board_data.spaces:
 		if space.name in ["Cave", "Crypt", "Dungeon", "Graveyard"]:
@@ -1172,4 +1176,106 @@ func try_trade_items(partner_index: int, give_items: Array[ItemData], take_items
 		me.inventory.append(item)
 	moves_remaining -= 1
 	items_changed.emit()
+	return true
+
+
+func _get_invisible_man() -> MonsterData:
+	for m in MonsterManager.monsters:
+		if m.monster_name == "Invisible Man":
+			return m
+	return null
+
+
+func can_advance_invisible_man() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	if _get_invisible_man() == null:
+		return false
+	var precinct_id := _find_space_by_name("Precinct")
+	if players[active_player_index].current_space_id != precinct_id:
+		return false
+	return not get_advance_invisible_man_items().is_empty()
+
+
+func get_advance_invisible_man_items() -> Array[ItemData]:
+	var open_slot_spaces: Dictionary = {}
+	for i in range(INVISIBLE_MAN_SLOT_NAMES.size()):
+		if invisible_man_slots[i] == null:
+			var sid := _find_space_by_name(INVISIBLE_MAN_SLOT_NAMES[i])
+			if sid >= 0:
+				open_slot_spaces[sid] = true
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it != null and open_slot_spaces.has(it.location):
+			result.append(it)
+	return result
+
+
+func try_advance_invisible_man(item: ItemData) -> bool:
+	if not can_advance_invisible_man():
+		return false
+	for i in range(INVISIBLE_MAN_SLOT_NAMES.size()):
+		if invisible_man_slots[i] != null:
+			continue
+		var sid := _find_space_by_name(INVISIBLE_MAN_SLOT_NAMES[i])
+		if sid == item.location:
+			invisible_man_slots[i] = item
+			players[active_player_index].inventory.erase(item)
+			moves_remaining -= 1
+			items_changed.emit()
+			invisible_man_changed.emit()
+			return true
+	return false
+
+
+func can_defeat_invisible_man() -> bool:
+	if game_over or phase_running or moves_remaining <= 0 or players.is_empty():
+		return false
+	var im := _get_invisible_man()
+	if im == null:
+		return false
+	for slot in invisible_man_slots:
+		if slot == null:
+			return false
+	if players[active_player_index].current_space_id != im.current_space_id:
+		return false
+	var total := 0
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it != null and it.color == "red":
+			total += it.strength + get_item_strength_boost()
+	return total >= 9
+
+
+func get_defeat_invisible_man_items() -> Array[ItemData]:
+	var result: Array[ItemData] = []
+	for item in players[active_player_index].inventory:
+		var it := item as ItemData
+		if it != null and it.color == "red":
+			result.append(it)
+	return result
+
+
+func try_defeat_invisible_man(items: Array[ItemData]) -> bool:
+	if not can_defeat_invisible_man():
+		return false
+	var boost := get_item_strength_boost()
+	var total := 0
+	for item in items:
+		if (item as ItemData).color == "red":
+			total += (item as ItemData).strength + boost
+	if total < 9:
+		return false
+	for item in items:
+		players[active_player_index].inventory.erase(item)
+	moves_remaining -= 1
+	invisible_man_slots = [null, null, null, null, null]
+	items_changed.emit()
+	invisible_man_changed.emit()
+	monster_defeated.emit("Invisible Man")
+	MonsterManager.remove_monster("Invisible Man")
+	if MonsterManager.monsters.is_empty():
+		game_over = true
+		game_won.emit()
 	return true

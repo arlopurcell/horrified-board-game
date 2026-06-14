@@ -724,6 +724,8 @@ func _trigger_power(monster: MonsterData, power_move_data: Array) -> String:
 			return _power_frankenstein_or_bride(power_move_data)
 		"Creature":
 			return _power_creature()
+		"Invisible Man":
+			return _power_invisible_man(monster, power_move_data)
 	return ""
 
 
@@ -778,6 +780,37 @@ func _power_creature() -> String:
 		GameManager.creature_changed.emit()
 		return "indicator moved back (now at position %d)" % GameManager.creature_path_index
 	return "indicator is already at the start"
+
+
+func _power_invisible_man(monster: MonsterData, power_move_data: Array) -> String:
+	var villager_spaces: Array[int] = []
+	for v in VillagerManager.villagers:
+		var vs := (v as VillagerData).current_space_id
+		if vs >= 0:
+			villager_spaces.append(vs)
+	if villager_spaces.is_empty():
+		return "no villagers on board"
+	var best_target := -1
+	var best_dist := 999999
+	for vs in villager_spaces:
+		var p := _bfs_path(monster.current_space_id, vs)
+		if p.size() > 1 and p.size() - 1 < best_dist:
+			best_dist = p.size() - 1
+			best_target = vs
+	if best_target == -1:
+		return "no villager reachable"
+	var path := _bfs_path(monster.current_space_id, best_target)
+	if path.size() < 2:
+		return "already at villager location"
+	var steps := mini(2, path.size() - 1)
+	monster.current_space_id = path[steps]
+	power_move_data.append({
+		"monster_idx": monsters.find(monster),
+		"path": path.slice(0, steps + 1)
+	})
+	var dest_space := GameManager.board_data.get_space(monster.current_space_id)
+	var dest_name := dest_space.name if dest_space != null else str(monster.current_space_id)
+	return "moved " + str(steps) + " step(s) toward nearest villager, now at " + dest_name
 
 
 func _power_dracula(dracula: MonsterData) -> String:

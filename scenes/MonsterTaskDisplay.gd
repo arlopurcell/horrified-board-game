@@ -36,6 +36,7 @@ func _ready() -> void:
 	GameManager.mummy_changed.connect(queue_redraw)
 	GameManager.frankenstein_changed.connect(queue_redraw)
 	GameManager.creature_changed.connect(queue_redraw)
+	GameManager.invisible_man_changed.connect(queue_redraw)
 	MonsterManager.frenzy_changed.connect(queue_redraw)
 
 func _draw() -> void:
@@ -60,6 +61,9 @@ func _draw() -> void:
 			continue
 		elif m.monster_name == "Creature":
 			_draw_creature(font, px)
+			px += PANEL_W + PANEL_GAP
+		elif m.monster_name == "Invisible Man":
+			_draw_invisible_man(font, px)
 			px += PANEL_W + PANEL_GAP
 		else:
 			continue
@@ -348,6 +352,44 @@ func _draw_creature(font: Font, px: float) -> void:
 
 	var ind_pos := positions[path_idx]
 	draw_arc(ind_pos, DOT_R + 3.0, 0, TAU, 24, Color(1.0, 0.85, 0.0), 2.5)
+
+
+func _draw_invisible_man(font: Font, px: float) -> void:
+	const SLOT_LABELS := ["Inn", "Barn", "Mans", "Lab", "Inst"]
+	const R := 11.0
+	const GAP := 6.0
+	const SLOTS := 5
+	const FS_LABEL := 9
+	var label_h := font.get_ascent(FS_LABEL) + font.get_descent(FS_LABEL) + 2.0
+	var panel_h := TITLE_H + H_PAD + R * 2.0 + 3.0 + label_h + H_PAD
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
+	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
+	var ta := font.get_ascent(FS_TITLE)
+	var td := font.get_descent(FS_TITLE)
+	draw_string(font, Vector2(px, PANEL_Y + TITLE_H * 0.5 + (ta - td) * 0.5),
+			"INVISIBLE MAN", HORIZONTAL_ALIGNMENT_CENTER, PANEL_W, FS_TITLE, TEXT_COL)
+	var row_w := SLOTS * R * 2.0 + (SLOTS - 1) * GAP
+	var cx0 := px + (PANEL_W - row_w) / 2.0 + R
+	var cy := PANEL_Y + TITLE_H + H_PAD + R
+	var la := font.get_ascent(FS_LABEL)
+	var ld := font.get_descent(FS_LABEL)
+	for i in range(SLOTS):
+		var cx := cx0 + i * (R * 2.0 + GAP)
+		var slot = GameManager.invisible_man_slots[i] if i < GameManager.invisible_man_slots.size() else null
+		var fill_col := MUMMY_EMPTY_COL
+		if slot != null:
+			var it := slot as ItemData
+			match it.color:
+				"red":    fill_col = Color(0.75, 0.22, 0.17)
+				"yellow": fill_col = Color(0.95, 0.77, 0.06)
+				"blue":   fill_col = Color(0.16, 0.50, 0.73)
+		draw_circle(Vector2(cx, cy), R, fill_col)
+		draw_arc(Vector2(cx, cy), R, 0, TAU, 24, BOX_BORDER, 1.5)
+		var label_y := cy + R + 3.0 + la
+		draw_string(font, Vector2(cx - R, label_y),
+				SLOT_LABELS[i], HORIZONTAL_ALIGNMENT_CENTER, R * 2.0, FS_LABEL,
+				Color(0.75, 0.75, 0.75))
 
 
 func _draw_frenzy_icon(px: float) -> void:

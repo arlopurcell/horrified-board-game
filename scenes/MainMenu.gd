@@ -6,6 +6,7 @@ const AVAILABLE_MONSTERS: Dictionary = {
     "Mummy": "res://resources/data/mummy.tres",
     "Frankenstein": ["res://resources/data/frankenstein.tres", "res://resources/data/bride.tres"],
     "Creature": "res://resources/data/creature.tres",
+    "Invisible Man": "res://resources/data/invisible_man.tres",
 }
 
 var _selected_player_count := 0

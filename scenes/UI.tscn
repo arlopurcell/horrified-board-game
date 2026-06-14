@@ -162,6 +162,18 @@ text = "DEFEAT CREATURE"
 theme_override_font_sizes/font_size = 13
 visible = false
 
+[node name="AdvanceInvisibleManButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(0, 36)
+text = "ADVANCE INVISIBLE MAN"
+theme_override_font_sizes/font_size = 13
+visible = false
+
+[node name="DefeatInvisibleManButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(0, 36)
+text = "DEFEAT INVISIBLE MAN"
+theme_override_font_sizes/font_size = 13
+visible = false
+
 [node name="TradeButton" type="Button" parent="ActionButtons"]
 custom_minimum_size = Vector2(0, 36)
 text = "TRADE ITEMS"

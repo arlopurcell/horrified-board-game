@@ -22,6 +22,8 @@ extends CanvasLayer
 @onready var advance_bride_button: Button = $ActionButtons/AdvanceBrideButton
 @onready var advance_creature_button: Button = $ActionButtons/AdvanceCreatureButton
 @onready var defeat_creature_button: Button = $ActionButtons/DefeatCreatureButton
+@onready var advance_invisible_man_button: Button = $ActionButtons/AdvanceInvisibleManButton
+@onready var defeat_invisible_man_button: Button = $ActionButtons/DefeatInvisibleManButton
 @onready var trade_button: Button = $ActionButtons/TradeButton
 @onready var _perk_panel: PerkCardsPanel = $PerkCardsPanel
 
@@ -61,6 +63,9 @@ func _ready() -> void:
 	advance_bride_button.pressed.connect(_on_advance_bride_pressed)
 	advance_creature_button.pressed.connect(_on_advance_creature_pressed)
 	defeat_creature_button.pressed.connect(_on_defeat_creature_pressed)
+	advance_invisible_man_button.pressed.connect(_on_advance_invisible_man_pressed)
+	defeat_invisible_man_button.pressed.connect(_on_defeat_invisible_man_pressed)
+	GameManager.invisible_man_changed.connect(_on_invisible_man_changed)
 	trade_button.pressed.connect(_on_trade_pressed)
 	GameManager.frankenstein_changed.connect(_on_frankenstein_changed)
 	GameManager.creature_changed.connect(_on_creature_changed)
@@ -355,6 +360,11 @@ func _on_item_panel_confirmed(selected_items: Array[ItemData]) -> void:
 			GameManager.try_advance_creature(selected_items[0])
 	elif _pending_action == "defeat_creature":
 		GameManager.try_defeat_creature(selected_items)
+	elif _pending_action == "advance_invisible_man":
+		if not selected_items.is_empty():
+			GameManager.try_advance_invisible_man(selected_items[0])
+	elif _pending_action == "defeat_invisible_man":
+		GameManager.try_defeat_invisible_man(selected_items)
 	elif _pending_action == "trade_give":
 		_trade_give_items = selected_items.duplicate()
 		_start_trade_take()
@@ -608,6 +618,26 @@ func _on_creature_changed() -> void:
 	_refresh_action_buttons()
 
 
+func _on_advance_invisible_man_pressed() -> void:
+	var items := GameManager.get_advance_invisible_man_items()
+	if items.is_empty():
+		return
+	_pending_action = "advance_invisible_man"
+	_item_panel.open(items, 0, 0, "Select an item to contribute to the Invisible Man panel", [], false, "Select Item")
+
+
+func _on_defeat_invisible_man_pressed() -> void:
+	var items := GameManager.get_defeat_invisible_man_items()
+	if items.is_empty():
+		return
+	_pending_action = "defeat_invisible_man"
+	_item_panel.open(items, GameManager.get_item_strength_boost(), 9)
+
+
+func _on_invisible_man_changed() -> void:
+	_refresh_action_buttons()
+
+
 func _on_trade_pressed() -> void:
 	var partners := GameManager.get_trade_partners()
 	if partners.is_empty():
@@ -688,6 +718,8 @@ func _refresh_action_buttons() -> void:
 	advance_bride_button.visible = GameManager.can_advance_bride()
 	advance_creature_button.visible = GameManager.can_advance_creature()
 	defeat_creature_button.visible = GameManager.can_defeat_creature()
+	advance_invisible_man_button.visible = GameManager.can_advance_invisible_man()
+	defeat_invisible_man_button.visible = GameManager.can_defeat_invisible_man()
 	trade_button.visible = GameManager.can_trade_items()
 	var active := GameManager.get_active_player()
 	if active != null and active.character != null:
@@ -753,9 +785,16 @@ func _refresh_inventory() -> void:
 			"blue":   color = Color(0.16, 0.50, 0.73)
 			"yellow": color = Color(0.95, 0.77, 0.06)
 			_:        color = Color.WHITE
+		var space := GameManager.board_data.get_space(item_data.location) if GameManager.board_data != null else null
+		var space_name := space.name if space != null else ""
 		inventory_list.push_color(color)
-		inventory_list.add_text("● %s  %d\n" % [item_data.item_name, item_data.strength])
+		inventory_list.add_text("● %s  %d" % [item_data.item_name, item_data.strength])
 		inventory_list.pop()
+		if space_name != "":
+			inventory_list.push_color(Color(0.55, 0.55, 0.55))
+			inventory_list.add_text("  · %s" % space_name)
+			inventory_list.pop()
+		inventory_list.add_text("\n")
 
 func _refresh_pickup_button() -> void:
 	pickup_button.disabled = not GameManager.can_pickup()
