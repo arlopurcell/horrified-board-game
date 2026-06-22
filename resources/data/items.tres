@@ -5,423 +5,423 @@
 
 [sub_resource type="Resource" id="Item0"]
 script = ExtResource("2")
-item_name = "Silver Bullet"
-color = "red"
-strength = 6
-location = 0
+item_name = "Crucifix"
+color = "yellow"
+strength = 4
+location = 18
 
 [sub_resource type="Resource" id="Item1"]
 script = ExtResource("2")
-item_name = "Wooden Stake"
+item_name = "Silver Cane"
 color = "red"
-strength = 5
-location = 3
+strength = 6
+location = 14
 
 [sub_resource type="Resource" id="Item2"]
 script = ExtResource("2")
-item_name = "Holy Symbol"
+item_name = "Dart"
 color = "red"
-strength = 4
-location = 7
+strength = 2
+location = 3
 
 [sub_resource type="Resource" id="Item3"]
 script = ExtResource("2")
-item_name = "Iron Chain"
+item_name = "Shovel"
 color = "red"
-strength = 3
-location = 11
+strength = 2
+location = 20
 
 [sub_resource type="Resource" id="Item4"]
 script = ExtResource("2")
-item_name = "Torch"
+item_name = "Rifle"
 color = "red"
-strength = 2
-location = 15
+strength = 6
+location = 4
 
 [sub_resource type="Resource" id="Item5"]
 script = ExtResource("2")
-item_name = "Garlic Wreath"
+item_name = "Pitchfork"
 color = "red"
-strength = 1
-location = 18
+strength = 4
+location = 4
 
 [sub_resource type="Resource" id="Item6"]
 script = ExtResource("2")
-item_name = "Flaming Arrow"
-color = "red"
-strength = 6
-location = 1
+item_name = "Canopic Jar"
+color = "yellow"
+strength = 3
+location = 16
 
 [sub_resource type="Resource" id="Item7"]
 script = ExtResource("2")
-item_name = "Blood Vial"
+item_name = "Rapier"
 color = "red"
 strength = 5
-location = 4
+location = 8
 
 [sub_resource type="Resource" id="Item8"]
 script = ExtResource("2")
-item_name = "Fire Charm"
+item_name = "Dart"
 color = "red"
-strength = 4
-location = 8
+strength = 2
+location = 3
 
 [sub_resource type="Resource" id="Item9"]
 script = ExtResource("2")
-item_name = "Scarlet Ribbon"
-color = "red"
-strength = 3
-location = 12
+item_name = "Flower"
+color = "yellow"
+strength = 2
+location = 13
 
 [sub_resource type="Resource" id="Item10"]
 script = ExtResource("2")
-item_name = "Crimson Key"
-color = "red"
-strength = 2
-location = 16
+item_name = "Violin"
+color = "yellow"
+strength = 3
+location = 1
 
 [sub_resource type="Resource" id="Item11"]
 script = ExtResource("2")
-item_name = "Dragon's Blood"
-color = "red"
-strength = 1
-location = 20
+item_name = "Cosmic Ray Diffuser"
+color = "blue"
+strength = 3
+location = 9
 
 [sub_resource type="Resource" id="Item12"]
 script = ExtResource("2")
-item_name = "Ruby Amulet"
-color = "red"
+item_name = "Tarot Deck"
+color = "yellow"
 strength = 3
-location = 2
+location = 1
 
 [sub_resource type="Resource" id="Item13"]
 script = ExtResource("2")
-item_name = "Ember Stone"
-color = "red"
+item_name = "Wolfsbane"
+color = "yellow"
 strength = 4
-location = 9
+location = 1
 
 [sub_resource type="Resource" id="Item14"]
 script = ExtResource("2")
-item_name = "War Banner"
+item_name = "Knife"
 color = "red"
-strength = 2
+strength = 3
 location = 13
 
 [sub_resource type="Resource" id="Item15"]
 script = ExtResource("2")
-item_name = "Infernal Seal"
-color = "red"
+item_name = "Anatomy Text"
+color = "blue"
 strength = 1
-location = 21
+location = 22
 
 [sub_resource type="Resource" id="Item16"]
 script = ExtResource("2")
-item_name = "Flame Sigil"
-color = "red"
-strength = 5
-location = 6
+item_name = "Wolfbane"
+color = "yellow"
+strength = 4
+location = 1
 
 [sub_resource type="Resource" id="Item17"]
 script = ExtResource("2")
-item_name = "Bloodstone"
-color = "red"
-strength = 6
-location = 10
+item_name = "Nebularium"
+color = "blue"
+strength = 3
+location = 9
 
 [sub_resource type="Resource" id="Item18"]
 script = ExtResource("2")
-item_name = "Red Lantern"
-color = "red"
+item_name = "Camera"
+color = "blue"
 strength = 3
-location = 17
+location = 21
 
 [sub_resource type="Resource" id="Item19"]
 script = ExtResource("2")
-item_name = "Smoldering Brand"
-color = "red"
-strength = 2
+item_name = "Anatomy Text"
+color = "blue"
+strength = 1
 location = 22
 
 [sub_resource type="Resource" id="Item20"]
 script = ExtResource("2")
-item_name = "Moon Water"
+item_name = "Monocane Mixture"
 color = "blue"
-strength = 6
-location = 14
+strength = 3
+location = 3
 
 [sub_resource type="Resource" id="Item21"]
 script = ExtResource("2")
-item_name = "Ancient Tome"
-color = "blue"
-strength = 5
-location = 19
+item_name = "Crucifix"
+color = "yellow"
+strength = 4
+location = 18
 
 [sub_resource type="Resource" id="Item22"]
 script = ExtResource("2")
-item_name = "Mystic Crystal"
-color = "blue"
-strength = 4
-location = 22
+item_name = "Pistol"
+color = "red"
+strength = 6
+location = 2
 
 [sub_resource type="Resource" id="Item23"]
 script = ExtResource("2")
-item_name = "Ice Shard"
+item_name = "Telescope"
 color = "blue"
-strength = 3
-location = 0
+strength = 2
+location = 11
 
 [sub_resource type="Resource" id="Item24"]
 script = ExtResource("2")
-item_name = "Storm Vial"
+item_name = "Magnifying Glass"
 color = "blue"
 strength = 2
-location = 3
+location = 22
 
 [sub_resource type="Resource" id="Item25"]
 script = ExtResource("2")
-item_name = "Ocean's Tear"
-color = "blue"
-strength = 1
-location = 7
+item_name = "Garlic"
+color = "yellow"
+strength = 2
+location = 3
 
 [sub_resource type="Resource" id="Item26"]
 script = ExtResource("2")
-item_name = "Sapphire Ring"
-color = "blue"
-strength = 6
+item_name = "Fire Poker"
+color = "red"
+strength = 3
 location = 11
 
 [sub_resource type="Resource" id="Item27"]
 script = ExtResource("2")
-item_name = "Frost Rune"
+item_name = "Magnifying Glass"
 color = "blue"
-strength = 5
-location = 15
+strength = 2
+location = 22
 
 [sub_resource type="Resource" id="Item28"]
 script = ExtResource("2")
-item_name = "Night Elixir"
-color = "blue"
-strength = 4
-location = 18
-
-[sub_resource type="Resource" id="Item29"]
-script = ExtResource("2")
-item_name = "Star Map"
-color = "blue"
-strength = 3
-location = 1
-
-[sub_resource type="Resource" id="Item30"]
-script = ExtResource("2")
-item_name = "Blue Candle"
-color = "blue"
-strength = 2
-location = 4
-
-[sub_resource type="Resource" id="Item31"]
-script = ExtResource("2")
-item_name = "Moonstone"
-color = "blue"
-strength = 1
-location = 8
-
-[sub_resource type="Resource" id="Item32"]
-script = ExtResource("2")
-item_name = "Tidal Charm"
-color = "blue"
-strength = 6
-location = 12
-
-[sub_resource type="Resource" id="Item33"]
-script = ExtResource("2")
-item_name = "Azure Seal"
-color = "blue"
-strength = 5
-location = 16
-
-[sub_resource type="Resource" id="Item34"]
-script = ExtResource("2")
-item_name = "Deep Shard"
-color = "blue"
-strength = 4
-location = 20
-
-[sub_resource type="Resource" id="Item35"]
-script = ExtResource("2")
-item_name = "Void Fragment"
-color = "blue"
-strength = 3
-location = 2
-
-[sub_resource type="Resource" id="Item36"]
-script = ExtResource("2")
-item_name = "Glacial Core"
-color = "blue"
-strength = 2
-location = 5
-
-[sub_resource type="Resource" id="Item37"]
-script = ExtResource("2")
-item_name = "Shadow Lens"
+item_name = "Kite"
 color = "blue"
 strength = 1
 location = 9
 
-[sub_resource type="Resource" id="Item38"]
+[sub_resource type="Resource" id="Item29"]
 script = ExtResource("2")
-item_name = "Cobalt Vial"
+item_name = "Research"
 color = "blue"
-strength = 6
-location = 13
+strength = 2
+location = 9
 
-[sub_resource type="Resource" id="Item39"]
+[sub_resource type="Resource" id="Item30"]
 script = ExtResource("2")
-item_name = "Blue Flame"
+item_name = "Centrifuge"
 color = "blue"
-strength = 5
-location = 17
-
-[sub_resource type="Resource" id="Item40"]
-script = ExtResource("2")
-item_name = "Gold Doubloon"
-color = "yellow"
-strength = 6
+strength = 1
 location = 21
 
-[sub_resource type="Resource" id="Item41"]
+[sub_resource type="Resource" id="Item31"]
 script = ExtResource("2")
-item_name = "Sun Stone"
-color = "yellow"
-strength = 5
-location = 6
-
-[sub_resource type="Resource" id="Item42"]
-script = ExtResource("2")
-item_name = "Lightning Rod"
+item_name = "Scroll Of Thoth"
 color = "yellow"
 strength = 4
-location = 10
+location = 16
 
-[sub_resource type="Resource" id="Item43"]
+[sub_resource type="Resource" id="Item32"]
 script = ExtResource("2")
-item_name = "Amber Crystal"
-color = "yellow"
-strength = 3
-location = 14
-
-[sub_resource type="Resource" id="Item44"]
-script = ExtResource("2")
-item_name = "Gilded Key"
-color = "yellow"
-strength = 2
-location = 19
-
-[sub_resource type="Resource" id="Item45"]
-script = ExtResource("2")
-item_name = "Bright Sigil"
-color = "yellow"
-strength = 1
-location = 22
-
-[sub_resource type="Resource" id="Item46"]
-script = ExtResource("2")
-item_name = "Solar Charm"
-color = "yellow"
-strength = 6
-location = 0
-
-[sub_resource type="Resource" id="Item47"]
-script = ExtResource("2")
-item_name = "Canary Feather"
-color = "yellow"
-strength = 5
-location = 3
-
-[sub_resource type="Resource" id="Item48"]
-script = ExtResource("2")
-item_name = "Honey Vial"
-color = "yellow"
-strength = 4
-location = 7
-
-[sub_resource type="Resource" id="Item49"]
-script = ExtResource("2")
-item_name = "Topaz Ring"
+item_name = "Mirrored Box"
 color = "yellow"
 strength = 3
 location = 11
 
-[sub_resource type="Resource" id="Item50"]
+[sub_resource type="Resource" id="Item33"]
 script = ExtResource("2")
-item_name = "Sunbeam Shard"
+item_name = "Charm"
 color = "yellow"
-strength = 2
-location = 15
-
-[sub_resource type="Resource" id="Item51"]
-script = ExtResource("2")
-item_name = "Fool's Gold"
-color = "yellow"
-strength = 1
-location = 18
-
-[sub_resource type="Resource" id="Item52"]
-script = ExtResource("2")
-item_name = "Golden Thread"
-color = "yellow"
-strength = 6
+strength = 4
 location = 1
 
-[sub_resource type="Resource" id="Item53"]
+[sub_resource type="Resource" id="Item34"]
 script = ExtResource("2")
-item_name = "Radiant Seal"
+item_name = "Stake"
 color = "yellow"
+strength = 3
+location = 10
+
+[sub_resource type="Resource" id="Item35"]
+script = ExtResource("2")
+item_name = "Searchlight"
+color = "blue"
+strength = 2
+location = 2
+
+[sub_resource type="Resource" id="Item36"]
+script = ExtResource("2")
+item_name = "Rotenone"
+color = "blue"
+strength = 3
+location = 22
+
+[sub_resource type="Resource" id="Item37"]
+script = ExtResource("2")
+item_name = "Rapier"
+color = "red"
+strength = 5
+location = 8
+
+[sub_resource type="Resource" id="Item38"]
+script = ExtResource("2")
+item_name = "Experiment"
+color = "blue"
+strength = 2
+location = 21
+
+[sub_resource type="Resource" id="Item39"]
+script = ExtResource("2")
+item_name = "Knife"
+color = "red"
+strength = 3
+location = 13
+
+[sub_resource type="Resource" id="Item40"]
+script = ExtResource("2")
+item_name = "Tablet"
+color = "yellow"
+strength = 3
+location = 16
+
+[sub_resource type="Resource" id="Item41"]
+script = ExtResource("2")
+item_name = "Research"
+color = "blue"
+strength = 2
+location = 9
+
+[sub_resource type="Resource" id="Item42"]
+script = ExtResource("2")
+item_name = "Shovel"
+color = "red"
+strength = 2
+location = 20
+
+[sub_resource type="Resource" id="Item43"]
+script = ExtResource("2")
+item_name = "Garlic"
+color = "yellow"
+strength = 2
+location = 3
+
+[sub_resource type="Resource" id="Item44"]
+script = ExtResource("2")
+item_name = "Wine"
+color = "yellow"
+strength = 2
+location = 18
+
+[sub_resource type="Resource" id="Item45"]
+script = ExtResource("2")
+item_name = "Stake"
+color = "yellow"
+strength = 3
+location = 10
+
+[sub_resource type="Resource" id="Item46"]
+script = ExtResource("2")
+item_name = "Torch"
+color = "red"
 strength = 5
 location = 4
 
-[sub_resource type="Resource" id="Item54"]
+[sub_resource type="Resource" id="Item47"]
 script = ExtResource("2")
-item_name = "Citrine Stone"
-color = "yellow"
+item_name = "Spear Gun"
+color = "red"
 strength = 4
-location = 8
+location = 22
 
-[sub_resource type="Resource" id="Item55"]
+[sub_resource type="Resource" id="Item48"]
 script = ExtResource("2")
-item_name = "Harvest Token"
-color = "yellow"
-strength = 3
-location = 12
-
-[sub_resource type="Resource" id="Item56"]
-script = ExtResource("2")
-item_name = "Brass Compass"
-color = "yellow"
-strength = 2
-location = 16
-
-[sub_resource type="Resource" id="Item57"]
-script = ExtResource("2")
-item_name = "Gilded Rune"
-color = "yellow"
-strength = 1
-location = 20
-
-[sub_resource type="Resource" id="Item58"]
-script = ExtResource("2")
-item_name = "Daybreak Charm"
-color = "yellow"
+item_name = "Pistol"
+color = "red"
 strength = 6
 location = 2
 
+[sub_resource type="Resource" id="Item49"]
+script = ExtResource("2")
+item_name = "Torch"
+color = "red"
+strength = 5
+location = 4
+
+[sub_resource type="Resource" id="Item50"]
+script = ExtResource("2")
+item_name = "Bear Trap"
+color = "red"
+strength = 4
+location = 14
+
+[sub_resource type="Resource" id="Item51"]
+script = ExtResource("2")
+item_name = "Experiment"
+color = "blue"
+strength = 2
+location = 21
+
+[sub_resource type="Resource" id="Item52"]
+script = ExtResource("2")
+item_name = "Fire Poker"
+color = "red"
+strength = 3
+location = 11
+
+[sub_resource type="Resource" id="Item53"]
+script = ExtResource("2")
+item_name = "Wine"
+color = "yellow"
+strength = 2
+location = 18
+
+[sub_resource type="Resource" id="Item54"]
+script = ExtResource("2")
+item_name = "Fossil"
+color = "blue"
+strength = 3
+location = 1
+
+[sub_resource type="Resource" id="Item55"]
+script = ExtResource("2")
+item_name = "Kite"
+color = "blue"
+strength = 1
+location = 9
+
+[sub_resource type="Resource" id="Item56"]
+script = ExtResource("2")
+item_name = "Centrifuge"
+color = "blue"
+strength = 1
+location = 21
+
+[sub_resource type="Resource" id="Item57"]
+script = ExtResource("2")
+item_name = "Flower"
+color = "yellow"
+strength = 2
+location = 13
+
+[sub_resource type="Resource" id="Item58"]
+script = ExtResource("2")
+item_name = "Mirrored Box"
+color = "yellow"
+strength = 3
+location = 11
+
 [sub_resource type="Resource" id="Item59"]
 script = ExtResource("2")
-item_name = "Amber Dust"
-color = "yellow"
-strength = 5
-location = 5
+item_name = "Pitchfork"
+color = "red"
+strength = 4
+location = 4
 
 [resource]
 script = ExtResource("1")
