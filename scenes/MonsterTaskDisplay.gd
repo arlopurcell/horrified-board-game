@@ -29,6 +29,11 @@ const MUMMY_CORRECT_COL := Color(0.18, 0.65, 0.25)
 const MUMMY_LINE_COL := Color(0.50, 0.50, 0.50, 0.45)
 const MUMMY_HINT_COL := Color(0.95, 0.90, 0.20)
 
+const DEFEAT_HEADER_COL := Color(0.85, 0.65, 0.10)
+const DEFEAT_TEXT_COL := Color(0.80, 0.80, 0.80)
+const FS_DEFEAT := 10
+const DEFEAT_LH := 13.0
+
 func _ready() -> void:
 	GameManager.items_changed.connect(queue_redraw)
 	GameManager.monster_defeated.connect(func(_n: String): queue_redraw())
@@ -72,7 +77,8 @@ func _draw() -> void:
 
 func _draw_dracula(font: Font, px: float) -> void:
 	var coffins := GameManager.dracula_coffins
-	var panel_h := TITLE_H + coffins.size() * ROW_H + H_PAD
+	var task_end := TITLE_H + coffins.size() * ROW_H
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -98,6 +104,8 @@ func _draw_dracula(font: Font, px: float) -> void:
 		draw_string(font, Vector2(cb_x + CB_SIZE + 6.0, ry + ROW_H * 0.5 + (la - ld) * 0.5),
 				space_name, HORIZONTAL_ALIGNMENT_LEFT, -1, FS_ROW, TEXT_COL)
 		ry += ROW_H
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["At Dracula's space:", "yellow items, str ≥6"])
 
 
 func _draw_wolfman(font: Font, px: float) -> void:
@@ -109,7 +117,8 @@ func _draw_wolfman(font: Font, px: float) -> void:
 		["Str 3", GameManager.wolfman_cure_s3 > 0],
 		["Str 3", GameManager.wolfman_cure_s3 > 1],
 	]
-	var panel_h := TITLE_H + rows.size() * ROW_H + H_PAD
+	var task_end := TITLE_H + rows.size() * ROW_H
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -135,6 +144,8 @@ func _draw_wolfman(font: Font, px: float) -> void:
 		draw_string(font, Vector2(cb_x + CB_SIZE + 6.0, ry + ROW_H * 0.5 + (la - ld) * 0.5),
 				"Blue item, " + label, HORIZONTAL_ALIGNMENT_LEFT, -1, FS_ROW, TEXT_COL)
 		ry += ROW_H
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["At Wolfman's space:", "Cure + red items, str ≥6"])
 
 
 func _mummy_slot_positions(px: float) -> Array[Vector2]:
@@ -162,7 +173,8 @@ func _mummy_panel_x() -> float:
 func _draw_mummy(font: Font, px: float) -> void:
 	if GameManager.mummy_slot_contents.size() < 7:
 		return
-	var panel_h := TITLE_H + H_PAD + MUMMY_PAD_TOP + (MUMMY_RING_R + MUMMY_TOKEN_R) * 2.0 + H_PAD
+	var task_end := TITLE_H + H_PAD + MUMMY_PAD_TOP + (MUMMY_RING_R + MUMMY_TOKEN_R) * 2.0
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -211,6 +223,8 @@ func _draw_mummy(font: Font, px: float) -> void:
 			draw_string(font, Vector2(label_pos.x - 6.0, label_pos.y + (la_s - ld_s) * 0.5),
 					str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, 12.0, FS_ROW - 2,
 					Color(0.70, 0.70, 0.70, 0.75))
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["At Mummy's space:", "red items, str ≥9"])
 
 
 func _input(event: InputEvent) -> void:
@@ -246,7 +260,8 @@ func _draw_frankenstein_bride(font: Font, px: float) -> void:
 	var pip := 10.0
 	var pip_gap := 2.0
 	var label_w := 14.0
-	var panel_h := TITLE_H + H_PAD + ROW_H + ROW_H + H_PAD
+	var task_end := TITLE_H + H_PAD + ROW_H * 2
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -282,6 +297,8 @@ func _draw_frankenstein_bride(font: Font, px: float) -> void:
 		var pip_col := Color(0.16, 0.50, 0.73) if filled else Color(0.10, 0.14, 0.25)
 		draw_rect(Rect2(pip_x, pip_y, pip, pip), pip_col)
 		draw_rect(Rect2(pip_x, pip_y, pip, pip), BOX_BORDER, false, 1.0)
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["Fill dials at their spaces;", "auto-defeat when they meet"])
 
 
 func _creature_dot_color(path_pos: int) -> Color:
@@ -305,7 +322,8 @@ func _draw_creature(font: Font, px: float) -> void:
 	var path_w := H_STEP * 6.0
 	var x0 := px + (PANEL_W - path_w) * 0.5
 	var y0 := PANEL_Y + TITLE_H + H_PAD + DOT_R
-	var panel_h := TITLE_H + H_PAD + V_STEP * 2.0 + DOT_R * 2.0 + H_PAD + 14.0
+	var task_end := TITLE_H + H_PAD + V_STEP * 2.0 + DOT_R * 2.0 + 14.0
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -352,6 +370,8 @@ func _draw_creature(font: Font, px: float) -> void:
 
 	var ind_pos := positions[path_idx]
 	draw_arc(ind_pos, DOT_R + 3.0, 0, TAU, 24, Color(1.0, 0.85, 0.0), 2.5)
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["At Creature's space:", "1 red + 1 yellow + 1 blue"])
 
 
 func _draw_invisible_man(font: Font, px: float) -> void:
@@ -361,7 +381,8 @@ func _draw_invisible_man(font: Font, px: float) -> void:
 	const SLOTS := 5
 	const FS_LABEL := 9
 	var label_h := font.get_ascent(FS_LABEL) + font.get_descent(FS_LABEL) + 2.0
-	var panel_h := TITLE_H + H_PAD + R * 2.0 + 3.0 + label_h + H_PAD
+	var task_end := TITLE_H + H_PAD + R * 2.0 + 3.0 + label_h
+	var panel_h := task_end + _defeat_section_h(2)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), PANEL_BG)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, panel_h), BORDER_COL, false, 2.0)
 	draw_rect(Rect2(px, PANEL_Y, PANEL_W, TITLE_H), TITLE_BG)
@@ -390,6 +411,27 @@ func _draw_invisible_man(font: Font, px: float) -> void:
 		draw_string(font, Vector2(cx - R, label_y),
 				SLOT_LABELS[i], HORIZONTAL_ALIGNMENT_CENTER, R * 2.0, FS_LABEL,
 				Color(0.75, 0.75, 0.75))
+	_draw_defeat_section(font, px, PANEL_Y + task_end,
+			["At Inv. Man's space:", "red items, str ≥9"])
+
+
+func _defeat_section_h(n_lines: int) -> float:
+	return 5.0 + DEFEAT_LH * (1 + n_lines) + H_PAD
+
+
+func _draw_defeat_section(font: Font, px: float, y: float, lines: Array[String]) -> void:
+	var la := font.get_ascent(FS_DEFEAT)
+	var ld := font.get_descent(FS_DEFEAT)
+	draw_line(Vector2(px + 4.0, y + 2.0), Vector2(px + PANEL_W - 4.0, y + 2.0),
+			Color(0.5, 0.5, 0.5, 0.5), 1.0)
+	var ry := y + 5.0
+	draw_string(font, Vector2(px + H_PAD, ry + DEFEAT_LH * 0.5 + (la - ld) * 0.5),
+			"DEFEAT:", HORIZONTAL_ALIGNMENT_LEFT, -1, FS_DEFEAT, DEFEAT_HEADER_COL)
+	ry += DEFEAT_LH
+	for line in lines:
+		draw_string(font, Vector2(px + H_PAD + 4.0, ry + DEFEAT_LH * 0.5 + (la - ld) * 0.5),
+				line, HORIZONTAL_ALIGNMENT_LEFT, PANEL_W - H_PAD - 8.0, FS_DEFEAT, DEFEAT_TEXT_COL)
+		ry += DEFEAT_LH
 
 
 func _draw_frenzy_icon(px: float) -> void:

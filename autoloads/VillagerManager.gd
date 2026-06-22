@@ -2,6 +2,7 @@ extends Node
 
 signal villagers_changed
 signal villager_rescued(villager_name: String)
+signal villager_moved(villager: VillagerData)
 
 var villagers: Array[VillagerData] = []
 
@@ -20,6 +21,7 @@ func get_villagers_at(space_id: int) -> Array:
 
 func move_villager(villager: VillagerData, space_id: int) -> void:
 	villager.current_space_id = space_id
+	villager_moved.emit(villager)
 	villagers_changed.emit()
 	if villager.current_space_id == villager.target_space_id:
 		_rescue(villager)

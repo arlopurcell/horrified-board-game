@@ -217,7 +217,7 @@ func _on_special_selected(choice_idx: int) -> void:
 				if (item as ItemData).item_name != "The Cure":
 					items.append(item as ItemData)
 			_pending_action = "hit_item"
-			_item_panel.open(items, 0, 0)
+			_item_panel.open(items, 0, 0, "", [], false, "Select Items to Discard", 1)
 		else:
 			_apply_hit_death()
 		return

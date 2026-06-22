@@ -69,7 +69,7 @@ func _compute_positions() -> Array[Vector2]:
 		by_space[sid].append(i)
 	for space_id in by_space:
 		var occupants: Array = by_space[space_id]
-		var base := _board.get_space_center(space_id)
+		var base := _board.get_space_center(space_id) + Vector2(-26.0, 0.0)
 		for j in range(occupants.size()):
 			var idx: int = occupants[j]
 			positions[idx] = base + _cluster_offset(j, occupants.size())
@@ -79,4 +79,4 @@ func _cluster_offset(slot: int, total: int) -> Vector2:
 	if total == 1:
 		return Vector2.ZERO
 	var angle := (TAU / total) * slot
-	return Vector2(cos(angle), sin(angle)) * 12.0
+	return Vector2(cos(angle), sin(angle)) * 8.0

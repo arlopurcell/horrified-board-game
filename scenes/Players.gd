@@ -72,4 +72,4 @@ func _cluster_offset(slot: int, total: int) -> Vector2:
 	if total == 1:
 		return Vector2.ZERO
 	var angle := (TAU / total) * slot
-	return Vector2(cos(angle), sin(angle)) * 12.0
+	return Vector2(cos(angle), sin(angle)) * 8.0

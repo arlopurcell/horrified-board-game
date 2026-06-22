@@ -13,6 +13,7 @@ var _required_strength: int = REQUIRED_STRENGTH
 var _custom_message: String = ""
 var _required_colors: Array[String] = []
 var _allow_empty: bool = false
+var _max_items: int = -1
 var _title_label: Label
 var _total_label: Label
 var _confirm_btn: Button
@@ -67,13 +68,14 @@ func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirmed)
 	btn_row.add_child(_confirm_btn)
 
-func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "", required_colors: Array[String] = [], allow_empty: bool = false, title: String = "Select Items to Discard") -> void:
+func open(items: Array[ItemData], strength_boost: int = 0, required_strength: int = REQUIRED_STRENGTH, custom_message: String = "", required_colors: Array[String] = [], allow_empty: bool = false, title: String = "Select Items to Discard", max_items: int = -1) -> void:
 	_items = items
 	_strength_boost = strength_boost
 	_required_strength = required_strength
 	_custom_message = custom_message
 	_required_colors = required_colors.duplicate()
 	_allow_empty = allow_empty
+	_max_items = max_items
 	_title_label.text = title
 	_checkboxes.clear()
 	for child in _item_list.get_children():
@@ -89,9 +91,17 @@ func open(items: Array[ItemData], strength_boost: int = 0, required_strength: in
 		var cb := CheckBox.new()
 		var effective := item.strength + _strength_boost
 		cb.text = "%s  (str %d)" % [item.item_name, effective]
-		cb.toggled.connect(_on_toggled)
+		cb.toggled.connect(_on_toggled.bind(_checkboxes.size()))
 		row.add_child(cb)
 		_checkboxes.append(cb)
+		var space := GameManager.board_data.get_space(item.location) if GameManager.board_data != null else null
+		if space != null:
+			var origin_lbl := Label.new()
+			origin_lbl.text = "· %s" % space.name
+			origin_lbl.add_theme_color_override("font_color", Color(0.55, 0.55, 0.55))
+			origin_lbl.add_theme_font_size_override("font_size", 12)
+			origin_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(origin_lbl)
 	_update_total()
 	visible = true
 
@@ -103,7 +113,11 @@ func _item_swatch_color(item: ItemData) -> Color:
 		_:        return Color(0.5, 0.5, 0.5, 0.0)
 
 
-func _on_toggled(_pressed: bool) -> void:
+func _on_toggled(pressed: bool, idx: int) -> void:
+	if pressed and _max_items == 1:
+		for i in range(_checkboxes.size()):
+			if i != idx:
+				_checkboxes[i].set_pressed_no_signal(false)
 	_update_total()
 
 func _update_total() -> void:

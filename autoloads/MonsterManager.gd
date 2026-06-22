@@ -256,6 +256,10 @@ func _run_card_logic(card: MonsterCardData, summary: Array[String]) -> void:
 			_logic_creature_retreat("River", summary)
 		"Retreat (Waterfront)":
 			_logic_creature_retreat("Waterfront", summary)
+		"Hypnotic Gaze":
+			_logic_hypnotic_gaze(summary)
+		"Thief":
+			_logic_the_thief(summary)
 
 
 func _logic_sunrise(summary: Array[String]) -> void:
@@ -611,6 +615,94 @@ func _logic_the_meeting(summary: Array[String]) -> void:
 	var dest_name := dest_space.name if dest_space != null else str(bride.current_space_id)
 	summary.append("The Bride moved " + str(steps) + " step(s) toward Frankenstein, now at " + dest_name)
 	GameManager.check_frankenstein_meeting()
+
+
+func _logic_hypnotic_gaze(summary: Array[String]) -> void:
+	var dracula: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Dracula":
+			dracula = m
+			break
+	if dracula == null:
+		return
+	var best_dist := 999999
+	var best_player_idx := -1
+	var best_villager: VillagerData = null
+	for i in range(GameManager.players.size()):
+		var sid := GameManager.players[i].current_space_id
+		if sid < 0:
+			continue
+		var path := _bfs_path(dracula.current_space_id, sid)
+		var dist := path.size() - 1
+		if dist >= 0 and dist < best_dist:
+			best_dist = dist
+			best_player_idx = i
+			best_villager = null
+	for v in VillagerManager.villagers:
+		var vd := v as VillagerData
+		if vd.current_space_id < 0:
+			continue
+		var path := _bfs_path(dracula.current_space_id, vd.current_space_id)
+		var dist := path.size() - 1
+		if dist >= 0 and dist < best_dist:
+			best_dist = dist
+			best_villager = vd
+			best_player_idx = -1
+	if best_player_idx == -1 and best_villager == null:
+		summary.append("Hypnotic Gaze: no targets on board")
+		return
+	if best_villager != null:
+		var path := _bfs_path(best_villager.current_space_id, dracula.current_space_id)
+		var steps := mini(3, path.size() - 1)
+		if steps <= 0:
+			summary.append("Hypnotic Gaze: %s is already with Dracula" % best_villager.villager_name)
+			return
+		VillagerManager.move_villager(best_villager, path[steps])
+		var dest := GameManager.board_data.get_space(path[steps]) if GameManager.board_data != null else null
+		summary.append("Hypnotic Gaze: %s drawn %d step(s) toward Dracula, now at %s" % [
+			best_villager.villager_name, steps, dest.name if dest != null else str(path[steps])])
+	else:
+		var player := GameManager.players[best_player_idx]
+		var path := _bfs_path(player.current_space_id, dracula.current_space_id)
+		var steps := mini(3, path.size() - 1)
+		if steps <= 0:
+			summary.append("Hypnotic Gaze: %s is already with Dracula" % player.display_name)
+			return
+		player.current_space_id = path[steps]
+		GameManager.player_moved.emit(best_player_idx, path[steps])
+		var dest := GameManager.board_data.get_space(path[steps]) if GameManager.board_data != null else null
+		summary.append("Hypnotic Gaze: %s drawn %d step(s) toward Dracula, now at %s" % [
+			player.display_name, steps, dest.name if dest != null else str(path[steps])])
+
+
+func _logic_the_thief(summary: Array[String]) -> void:
+	var im: MonsterData = null
+	for m in monsters:
+		if m.monster_name == "Invisible Man":
+			im = m
+			break
+	if im == null:
+		return
+	if GameManager.board_items.is_empty():
+		summary.append("The Thief: no items on the board")
+		return
+	var best_space := -1
+	var best_count := 0
+	for space_id in GameManager.board_items:
+		var count: int = (GameManager.board_items[space_id] as Array).size()
+		if count > best_count:
+			best_count = count
+			best_space = space_id
+	if best_space == -1 or best_count == 0:
+		summary.append("The Thief: no items on the board")
+		return
+	im.current_space_id = best_space
+	monster_relocated.emit()
+	GameManager.board_items.erase(best_space)
+	GameManager.items_changed.emit()
+	var dest_space := GameManager.board_data.get_space(best_space) if GameManager.board_data != null else null
+	var dest_name := dest_space.name if dest_space != null else str(best_space)
+	summary.append("Invisible Man moved to %s and stole %d item(s)" % [dest_name, best_count])
 
 
 func _logic_creature_retreat(space_name: String, summary: Array[String]) -> void:

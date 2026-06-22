@@ -5,6 +5,7 @@ const VillagerTokenScene := preload("res://scenes/VillagerToken.tscn")
 var _villagers: Array[VillagerData] = []
 var _tokens: Array[VillagerToken] = []
 var _board: Board = null
+var _animating: Dictionary = {}  # VillagerData -> true while tween is running
 
 
 func setup(villager_list: Array[VillagerData], board: Board) -> void:
@@ -12,6 +13,7 @@ func setup(villager_list: Array[VillagerData], board: Board) -> void:
 	_villagers = villager_list.duplicate()
 	for v in _villagers:
 		_add_token(v as VillagerData)
+	VillagerManager.villager_moved.connect(_on_villager_moved)
 	VillagerManager.villagers_changed.connect(_on_villagers_changed)
 	_place_all_tokens()
 
@@ -21,6 +23,16 @@ func _add_token(villager: VillagerData) -> void:
 	add_child(token)
 	token.setup(villager)
 	_tokens.append(token)
+
+
+func _on_villager_moved(villager: VillagerData) -> void:
+	var idx := _villagers.find(villager)
+	if idx < 0:
+		return
+	var positions := _compute_positions()
+	_animating[villager] = true
+	var tween := _tokens[idx].move_to(positions[idx])
+	tween.finished.connect(func(): _animating.erase(villager))
 
 
 func _on_villagers_changed() -> void:
@@ -37,6 +49,8 @@ func _on_villagers_changed() -> void:
 func _place_all_tokens() -> void:
 	var positions := _compute_positions()
 	for i in range(_tokens.size()):
+		if _animating.has(_villagers[i]):
+			continue
 		var on_board := _villagers[i].current_space_id >= 0
 		_tokens[i].visible = on_board
 		if on_board:
@@ -54,7 +68,7 @@ func _compute_positions() -> Array[Vector2]:
 		by_space[sid].append(i)
 	for space_id in by_space:
 		var occupants: Array = by_space[space_id]
-		var base := _board.get_space_center(space_id) + Vector2(0.0, 18.0)
+		var base := _board.get_space_center(space_id) + Vector2(26.0, 0.0)
 		for j in range(occupants.size()):
 			var idx: int = occupants[j]
 			positions[idx] = base + _cluster_offset(j, occupants.size())
@@ -65,4 +79,4 @@ func _cluster_offset(slot: int, total: int) -> Vector2:
 	if total == 1:
 		return Vector2.ZERO
 	var angle := (TAU / total) * slot
-	return Vector2(cos(angle), sin(angle)) * 10.0
+	return Vector2(cos(angle), sin(angle)) * 8.0
